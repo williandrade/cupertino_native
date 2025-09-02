@@ -27,7 +27,7 @@ class _MyAppState extends State<MyApp> {
               const Text('Cupertino native slider demo:'),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: CupertinoNativeSlider(
+                child: CNSlider(
                   value: _value,
                   min: 0,
                   max: 100,

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class CupertinoNativeSliderController {
+class CNSliderController {
   MethodChannel? _channel;
 
   void _attach(MethodChannel channel) {
@@ -35,8 +35,8 @@ class CupertinoNativeSliderController {
   }
 }
 
-class CupertinoNativeSlider extends StatefulWidget {
-  const CupertinoNativeSlider({
+class CNSlider extends StatefulWidget {
+  const CNSlider({
     super.key,
     required this.value,
     required this.onChanged,
@@ -52,14 +52,14 @@ class CupertinoNativeSlider extends StatefulWidget {
   final double max;
   final bool enabled;
   final ValueChanged<double> onChanged;
-  final CupertinoNativeSliderController? controller;
+  final CNSliderController? controller;
   final double height;
 
   @override
-  State<CupertinoNativeSlider> createState() => _CupertinoNativeSliderState();
+  State<CNSlider> createState() => _CNSliderState();
 }
 
-class _CupertinoNativeSliderState extends State<CupertinoNativeSlider> {
+class _CNSliderState extends State<CNSlider> {
   MethodChannel? _channel;
 
   double? _lastValue;
@@ -67,11 +67,10 @@ class _CupertinoNativeSliderState extends State<CupertinoNativeSlider> {
   double? _lastMax;
   bool? _lastEnabled;
 
-  CupertinoNativeSliderController? _internalController;
+  CNSliderController? _internalController;
 
-  CupertinoNativeSliderController get _controller =>
-      widget.controller ??
-      (_internalController ??= CupertinoNativeSliderController());
+  CNSliderController get _controller =>
+      widget.controller ?? (_internalController ??= CNSliderController());
 
   @override
   void dispose() {
@@ -81,7 +80,7 @@ class _CupertinoNativeSliderState extends State<CupertinoNativeSlider> {
   }
 
   @override
-  void didUpdateWidget(covariant CupertinoNativeSlider oldWidget) {
+  void didUpdateWidget(covariant CNSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncPropsToNativeIfNeeded();
   }

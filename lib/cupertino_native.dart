@@ -1,6 +1,6 @@
 export 'cupertino_native_platform_interface.dart';
 export 'cupertino_native_method_channel.dart';
-export 'cupertino_native_slider.dart';
+export 'components/slider.dart';
 
 import 'cupertino_native_platform_interface.dart';
 
