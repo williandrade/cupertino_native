@@ -1,43 +1,49 @@
-import 'package:flutter/material.dart';
-import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/cupertino.dart';
+import 'demos/slider.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return CupertinoApp(home: HomePage());
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  double _value = 50;
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Plugin example')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Cupertino native slider demo:'),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: CNSlider(
-                  value: _value,
-                  min: 0,
-                  max: 100,
-                  enabled: true,
-                  onChanged: (v) => setState(() => _value = v),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Cupertino Native'),
+      ),
+      child: SafeArea(
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            CupertinoListSection.insetGrouped(
+              header: Text('Components'),
+              children: [
+                CupertinoListTile(
+                  title: Text('Slider'),
+                  trailing: CupertinoListTileChevron(),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (_) => const SliderDemoPage(),
+                      ),
+                    );
+                  },
                 ),
-              ),
-              Text('Value: ${_value.toStringAsFixed(1)}'),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );
