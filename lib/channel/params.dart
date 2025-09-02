@@ -22,10 +22,26 @@ int? resolveColorToArgb(Color? color, BuildContext context) {
 }
 
 /// Creates a unified style map for platform views.
-/// Currently supports: `tint` as ARGB int.
-Map<String, dynamic> encodeStyle(BuildContext context, {Color? tint}) {
-  final tintInt = resolveColorToArgb(tint, context);
+/// Keys (all ARGB ints):
+/// - tint: general accent color
+/// - thumbTint: slider/switch thumb color
+/// - trackTint: active track color
+/// - trackBackgroundTint: inactive track color
+Map<String, dynamic> encodeStyle(
+  BuildContext context, {
+  Color? tint,
+  Color? thumbTint,
+  Color? trackTint,
+  Color? trackBackgroundTint,
+}) {
   final style = <String, dynamic>{};
+  final tintInt = resolveColorToArgb(tint, context);
+  final thumbInt = resolveColorToArgb(thumbTint, context);
+  final trackInt = resolveColorToArgb(trackTint, context);
+  final trackBgInt = resolveColorToArgb(trackBackgroundTint, context);
   if (tintInt != null) style['tint'] = tintInt;
+  if (thumbInt != null) style['thumbTint'] = thumbInt;
+  if (trackInt != null) style['trackTint'] = trackInt;
+  if (trackBgInt != null) style['trackBackgroundTint'] = trackBgInt;
   return style;
 }

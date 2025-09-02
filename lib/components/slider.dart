@@ -49,6 +49,10 @@ class CNSlider extends StatefulWidget {
     this.controller,
     this.height = 44.0,
     this.color,
+    this.thumbColor,
+    this.trackColor,
+    this.trackBackgroundColor,
+    this.step,
   });
 
   final double value;
@@ -59,6 +63,10 @@ class CNSlider extends StatefulWidget {
   final CNSliderController? controller;
   final double height;
   final Color? color;
+  final Color? thumbColor;
+  final Color? trackColor;
+  final Color? trackBackgroundColor;
+  final double? step;
 
   @override
   State<CNSlider> createState() => _CNSliderState();
@@ -73,6 +81,10 @@ class _CNSliderState extends State<CNSlider> {
   bool? _lastEnabled;
   bool? _lastIsDark;
   int? _lastTint;
+  int? _lastThumbTint;
+  int? _lastTrackTint;
+  int? _lastTrackBgTint;
+  double? _lastStep;
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   CNSliderController? _internalController;
@@ -124,7 +136,14 @@ class _CNSliderState extends State<CNSlider> {
       'value': widget.value,
       'enabled': widget.enabled,
       'isDark': _isDark,
-      'style': encodeStyle(context, tint: widget.color),
+      'style': encodeStyle(
+        context,
+        tint: widget.color,
+        thumbTint: widget.thumbColor,
+        trackTint: widget.trackColor,
+        trackBackgroundTint: widget.trackBackgroundColor,
+      ),
+      if (widget.step != null) 'step': widget.step,
     };
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -201,6 +220,10 @@ class _CNSliderState extends State<CNSlider> {
     _lastEnabled = widget.enabled;
     _lastIsDark = _isDark;
     _lastTint = resolveColorToArgb(widget.color, context);
+    _lastThumbTint = resolveColorToArgb(widget.thumbColor, context);
+    _lastTrackTint = resolveColorToArgb(widget.trackColor, context);
+    _lastTrackBgTint = resolveColorToArgb(widget.trackBackgroundColor, context);
+    _lastStep = widget.step;
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
@@ -209,6 +232,9 @@ class _CNSliderState extends State<CNSlider> {
 
     // Resolve any context-dependent values before awaiting.
     final int? tint = resolveColorToArgb(widget.color, context);
+    final int? thumb0 = resolveColorToArgb(widget.thumbColor, context);
+    final int? track0 = resolveColorToArgb(widget.trackColor, context);
+    final int? trackBg0 = resolveColorToArgb(widget.trackBackgroundColor, context);
 
     if (_lastMin != widget.min || _lastMax != widget.max) {
       await channel.invokeMethod('setRange', {
@@ -233,12 +259,34 @@ class _CNSliderState extends State<CNSlider> {
       _lastValue = clamped;
     }
 
-    // Style updates (e.g., tint color)
+    // Style updates (e.g., tint colors)
+    final thumb = thumb0;
+    final track = track0;
+    final trackBg = trackBg0;
+    final styleUpdate = <String, dynamic>{};
     if (_lastTint != tint && tint != null) {
-      await channel.invokeMethod('setStyle', {
-        'tint': tint,
-      });
+      styleUpdate['tint'] = tint;
       _lastTint = tint;
+    }
+    if (_lastThumbTint != thumb && thumb != null) {
+      styleUpdate['thumbTint'] = thumb;
+      _lastThumbTint = thumb;
+    }
+    if (_lastTrackTint != track && track != null) {
+      styleUpdate['trackTint'] = track;
+      _lastTrackTint = track;
+    }
+    if (_lastTrackBgTint != trackBg && trackBg != null) {
+      styleUpdate['trackBackgroundTint'] = trackBg;
+      _lastTrackBgTint = trackBg;
+    }
+    if (styleUpdate.isNotEmpty) {
+      await channel.invokeMethod('setStyle', styleUpdate);
+    }
+
+    if (_lastStep != widget.step && widget.step != null) {
+      await channel.invokeMethod('setStep', {'step': widget.step});
+      _lastStep = widget.step;
     }
   }
 
@@ -248,15 +296,20 @@ class _CNSliderState extends State<CNSlider> {
     // Resolve theme-dependent values before awaiting.
     final isDark = _isDark;
     final int? tint = resolveColorToArgb(widget.color, context);
+    final int? thumb = resolveColorToArgb(widget.thumbColor, context);
+    final int? track = resolveColorToArgb(widget.trackColor, context);
+    final int? trackBg = resolveColorToArgb(widget.trackBackgroundColor, context);
 
     if (_lastIsDark != isDark) {
       await channel.invokeMethod('setBrightness', {'isDark': isDark});
       _lastIsDark = isDark;
     }
 
-    if (_lastTint != tint && tint != null) {
-      await channel.invokeMethod('setStyle', {'tint': tint});
-      _lastTint = tint;
-    }
+    final styleUpdate = <String, dynamic>{};
+    if (_lastTint != tint && tint != null) { styleUpdate['tint'] = tint; _lastTint = tint; }
+    if (_lastThumbTint != thumb && thumb != null) { styleUpdate['thumbTint'] = thumb; _lastThumbTint = thumb; }
+    if (_lastTrackTint != track && track != null) { styleUpdate['trackTint'] = track; _lastTrackTint = track; }
+    if (_lastTrackBgTint != trackBg && trackBg != null) { styleUpdate['trackBackgroundTint'] = trackBg; _lastTrackBgTint = trackBg; }
+    if (styleUpdate.isNotEmpty) { await channel.invokeMethod('setStyle', styleUpdate); }
   }
 }

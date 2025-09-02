@@ -11,6 +11,8 @@ class SliderDemoPage extends StatefulWidget {
 class _SliderDemoPageState extends State<SliderDemoPage> {
   double _fullWidthValue = 50;
   double _halfWidthValue = 25;
+  double _stepValue = 0;
+  double _styledValue = 40;
   double _pinkValue = 30;
 
   @override
@@ -32,17 +34,6 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
             ),
             Text('Value: ${_fullWidthValue.toStringAsFixed(1)}'),
             const SizedBox(height: 24),
-            const Text('Tinted slider (systemPink)'),
-            CNSlider(
-              value: _pinkValue,
-              min: 0,
-              max: 100,
-              enabled: true,
-              color: CupertinoColors.systemPink,
-              onChanged: (v) => setState(() => _pinkValue = v),
-            ),
-            Text('Value: ${_pinkValue.toStringAsFixed(1)}'),
-            const SizedBox(height: 24),
             const Text('Half width slider'),
             Align(
               alignment: Alignment.center,
@@ -61,6 +52,41 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
               'Value: ${_halfWidthValue.toStringAsFixed(1)}',
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 24),
+            const Text('Tinted slider (systemPink)'),
+            CNSlider(
+              value: _pinkValue,
+              min: 0,
+              max: 100,
+              enabled: true,
+              color: CupertinoColors.systemPink,
+              onChanged: (v) => setState(() => _pinkValue = v),
+            ),
+            Text('Value: ${_pinkValue.toStringAsFixed(1)}'),
+            const SizedBox(height: 24),
+            const Text('Step slider (step = 10)'),
+            CNSlider(
+              value: _stepValue,
+              min: 0,
+              max: 100,
+              enabled: true,
+              step: 10,
+              onChanged: (v) => setState(() => _stepValue = v),
+            ),
+            Text('Value: ${_stepValue.toStringAsFixed(0)}'),
+            const SizedBox(height: 24),
+            const Text('Styled slider (thumb/track/background)'),
+            CNSlider(
+              value: _styledValue,
+              min: 0,
+              max: 100,
+              enabled: true,
+              thumbColor: CupertinoColors.systemPink,
+              trackColor: CupertinoColors.systemBlue,
+              trackBackgroundColor: CupertinoColors.systemGrey2,
+              onChanged: (v) => setState(() => _styledValue = v),
+            ),
+            Text('Value: ${_styledValue.toStringAsFixed(1)}'),
             const SizedBox(height: 24),
             const Text('Disabled slider'),
             CNSlider(

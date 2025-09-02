@@ -15,12 +15,14 @@ class CupertinoSliderNSView: NSView {
     var enabled: Bool = true
     var isDark: Bool = false
     var initialTint: NSColor? = nil
+    var initialStep: Double? = nil
     if let dict = args as? [String: Any] {
       if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
       if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
       if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
+      if let v = dict["step"] as? NSNumber { initialStep = v.doubleValue }
       if let style = dict["style"] as? [String: Any], let tintNum = style["tint"] as? NSNumber {
         initialTint = Self.colorFromARGB(tintNum.intValue)
       }
@@ -47,6 +49,9 @@ class CupertinoSliderNSView: NSView {
       hostingController.view.topAnchor.constraint(equalTo: topAnchor),
       hostingController.view.bottomAnchor.constraint(equalTo: bottomAnchor)
     ])
+
+    if let tint = initialTint { model.tintColor = Color(tint) }
+    if let s = initialStep, s > 0 { model.step = s } else { model.step = nil }
 
     channel.setMethodCallHandler { call, result in
       switch call.method {
@@ -75,8 +80,18 @@ class CupertinoSliderNSView: NSView {
             let ns = Self.colorFromARGB(tintNum.intValue)
             model.tintColor = Color(ns)
           }
+          // Best-effort: if specific track/thumb colors provided, prefer them as overall tint
+          if let tintNum = (args["trackTint"] as? NSNumber) ?? (args["thumbTint"] as? NSNumber) {
+            let ns = Self.colorFromARGB(tintNum.intValue)
+            model.tintColor = Color(ns)
+          }
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
+      case "setStep":
+        if let args = call.arguments as? [String: Any], let step = (args["step"] as? NSNumber)?.doubleValue {
+          model.step = step > 0 ? step : nil
+          result(nil)
+        } else { result(FlutterError(code: "bad_args", message: "Missing step", details: nil)) }
       case "setBrightness":
         if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
           self.hostingController.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -84,9 +99,6 @@ class CupertinoSliderNSView: NSView {
         } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
       default:
         result(FlutterMethodNotImplemented)
-    if let tint = initialTint {
-      model.tintColor = Color(tint)
-    }
       }
     }
   }
