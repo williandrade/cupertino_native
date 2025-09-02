@@ -40,6 +40,7 @@ class CNSwitch extends StatefulWidget {
     this.enabled = true,
     this.controller,
     this.height = 44.0,
+    this.color,
   });
 
   final bool value;
@@ -47,6 +48,7 @@ class CNSwitch extends StatefulWidget {
   final ValueChanged<bool> onChanged;
   final CNSwitchController? controller;
   final double height;
+  final Color? color;
 
   @override
   State<CNSwitch> createState() => _CNSwitchState();
@@ -58,6 +60,7 @@ class _CNSwitchState extends State<CNSwitch> {
   bool? _lastValue;
   bool? _lastEnabled;
   bool? _lastIsDark;
+  int? _lastTint;
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   CNSwitchController? _internalController;
@@ -103,7 +106,7 @@ class _CNSwitchState extends State<CNSwitch> {
       'value': widget.value,
       'enabled': widget.enabled,
       'isDark': _isDark,
-      'style': encodeStyle(context),
+      'style': encodeStyle(context, tint: widget.color),
     };
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -171,11 +174,15 @@ class _CNSwitchState extends State<CNSwitch> {
     _lastValue = widget.value;
     _lastEnabled = widget.enabled;
     _lastIsDark = _isDark;
+    _lastTint = resolveColorToArgb(widget.color, context);
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
+
+    // Resolve theme-dependent values before awaiting.
+    final int? tint = resolveColorToArgb(widget.color, context);
 
     if (_lastEnabled != widget.enabled) {
       await channel.invokeMethod('setEnabled', {'enabled': widget.enabled});
@@ -189,15 +196,28 @@ class _CNSwitchState extends State<CNSwitch> {
       });
       _lastValue = widget.value;
     }
+
+    // Style updates (e.g., tint color)
+    if (_lastTint != tint && tint != null) {
+      await channel.invokeMethod('setStyle', {'tint': tint});
+      _lastTint = tint;
+    }
   }
 
   Future<void> _syncBrightnessIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
     final isDark = _isDark;
+    final int? tint = resolveColorToArgb(widget.color, context);
+
     if (_lastIsDark != isDark) {
       await channel.invokeMethod('setBrightness', {'isDark': isDark});
       _lastIsDark = isDark;
+    }
+
+    if (_lastTint != tint && tint != null) {
+      await channel.invokeMethod('setStyle', {'tint': tint});
+      _lastTint = tint;
     }
   }
 }

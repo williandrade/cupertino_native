@@ -11,6 +11,7 @@ class SwitchDemoPage extends StatefulWidget {
 class _SwitchDemoPageState extends State<SwitchDemoPage> {
   bool _value1 = true;
   bool _value2 = false;
+  bool _pinkValue = true;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +29,15 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
               onChanged: (v) => setState(() => _value1 = v),
             ),
             Text('Value: ${_value1 ? 'ON' : 'OFF'}'),
+            const SizedBox(height: 24),
+            const Text('Tinted switch (systemPink)'),
+            CNSwitch(
+              value: _pinkValue,
+              enabled: true,
+              color: CupertinoColors.systemPink,
+              onChanged: (v) => setState(() => _pinkValue = v),
+            ),
+            Text('Value: ${_pinkValue ? 'ON' : 'OFF'}'),
             const SizedBox(height: 24),
             const Text('Centered switch'),
             Align(
@@ -57,4 +67,3 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
 }
 
 void _noop(bool _) {}
-
