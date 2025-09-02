@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
@@ -55,6 +56,8 @@ class _CNSwitchState extends State<CNSwitch> {
 
   bool? _lastValue;
   bool? _lastEnabled;
+  bool? _lastIsDark;
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   CNSwitchController? _internalController;
 
@@ -75,6 +78,12 @@ class _CNSwitchState extends State<CNSwitch> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Fallback to Flutter Switch on unsupported platforms.
     if (!(defaultTargetPlatform == TargetPlatform.iOS ||
@@ -92,6 +101,7 @@ class _CNSwitchState extends State<CNSwitch> {
     final creationParams = <String, dynamic>{
       'value': widget.value,
       'enabled': widget.enabled,
+      'isDark': _isDark,
     };
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -140,6 +150,7 @@ class _CNSwitchState extends State<CNSwitch> {
     _controller._attach(channel);
     channel.setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
+    _syncBrightnessIfNeeded();
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -157,6 +168,7 @@ class _CNSwitchState extends State<CNSwitch> {
   void _cacheCurrentProps() {
     _lastValue = widget.value;
     _lastEnabled = widget.enabled;
+    _lastIsDark = _isDark;
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
@@ -176,5 +188,14 @@ class _CNSwitchState extends State<CNSwitch> {
       _lastValue = widget.value;
     }
   }
-}
 
+  Future<void> _syncBrightnessIfNeeded() async {
+    final channel = _channel;
+    if (channel == null) return;
+    final isDark = _isDark;
+    if (_lastIsDark != isDark) {
+      await channel.invokeMethod('setBrightness', {'isDark': isDark});
+      _lastIsDark = isDark;
+    }
+  }
+}

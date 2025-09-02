@@ -13,11 +13,13 @@ class CupertinoSliderNSView: NSView {
     var minValue: Double = 0
     var maxValue: Double = 1
     var enabled: Bool = true
+    var isDark: Bool = false
     if let dict = args as? [String: Any] {
       if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
       if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
       if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
+      if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
     }
 
     var channelRef: FlutterMethodChannel? = nil
@@ -31,6 +33,7 @@ class CupertinoSliderNSView: NSView {
 
     hostingController.view.wantsLayer = true
     hostingController.view.layer?.backgroundColor = NSColor.clear.cgColor
+    hostingController.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
 
     addSubview(hostingController.view)
     hostingController.view.translatesAutoresizingMaskIntoConstraints = false
@@ -62,6 +65,11 @@ class CupertinoSliderNSView: NSView {
           model.enabled = enabled
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
+      case "setBrightness":
+        if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
+          self.hostingController.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+          result(nil)
+        } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -72,4 +80,3 @@ class CupertinoSliderNSView: NSView {
     return nil
   }
 }
-

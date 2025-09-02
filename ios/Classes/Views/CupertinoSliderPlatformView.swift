@@ -14,11 +14,13 @@ class CupertinoSliderPlatformView: NSObject, FlutterPlatformView {
     var minValue: Double = 0
     var maxValue: Double = 1
     var enabled: Bool = true
+    var isDark: Bool = false
     if let dict = args as? [String: Any] {
       if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
       if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
       if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
+      if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
     }
 
     let model = SliderModel(value: initialValue, min: minValue, max: maxValue, enabled: enabled) { newValue in
@@ -27,6 +29,9 @@ class CupertinoSliderPlatformView: NSObject, FlutterPlatformView {
     self.hostingController = UIHostingController(rootView: CupertinoSliderView(model: model))
     self.hostingController.view.backgroundColor = .clear
     self.hostingController.view.isOpaque = false
+    if #available(iOS 13.0, *) {
+      self.hostingController.overrideUserInterfaceStyle = isDark ? .dark : .light
+    }
     super.init()
 
     channel.setMethodCallHandler { call, result in
@@ -50,6 +55,13 @@ class CupertinoSliderPlatformView: NSObject, FlutterPlatformView {
           model.enabled = enabled
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
+      case "setBrightness":
+        if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
+          if #available(iOS 13.0, *) {
+            self.hostingController.overrideUserInterfaceStyle = isDark ? .dark : .light
+          }
+          result(nil)
+        } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -60,4 +72,3 @@ class CupertinoSliderPlatformView: NSObject, FlutterPlatformView {
     return hostingController.view
   }
 }
-

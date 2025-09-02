@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
@@ -67,6 +68,8 @@ class _CNSliderState extends State<CNSlider> {
   double? _lastMin;
   double? _lastMax;
   bool? _lastEnabled;
+  bool? _lastIsDark;
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   CNSliderController? _internalController;
 
@@ -84,6 +87,13 @@ class _CNSliderState extends State<CNSlider> {
   void didUpdateWidget(covariant CNSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncPropsToNativeIfNeeded();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Theme may have changed
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -109,6 +119,7 @@ class _CNSliderState extends State<CNSlider> {
       'max': widget.max,
       'value': widget.value,
       'enabled': widget.enabled,
+      'isDark': _isDark,
     };
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -163,6 +174,7 @@ class _CNSliderState extends State<CNSlider> {
     _controller._attach(channel);
     channel.setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
+    _syncBrightnessIfNeeded();
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -182,6 +194,7 @@ class _CNSliderState extends State<CNSlider> {
     _lastMin = widget.min;
     _lastMax = widget.max;
     _lastEnabled = widget.enabled;
+    _lastIsDark = _isDark;
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
@@ -209,6 +222,16 @@ class _CNSliderState extends State<CNSlider> {
         'animated': false,
       });
       _lastValue = clamped;
+    }
+  }
+
+  Future<void> _syncBrightnessIfNeeded() async {
+    final channel = _channel;
+    if (channel == null) return;
+    final isDark = _isDark;
+    if (_lastIsDark != isDark) {
+      await channel.invokeMethod('setBrightness', {'isDark': isDark});
+      _lastIsDark = isDark;
     }
   }
 }

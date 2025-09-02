@@ -12,9 +12,11 @@ class CupertinoSwitchPlatformView: NSObject, FlutterPlatformView {
 
     var initialValue: Bool = false
     var enabled: Bool = true
+    var isDark: Bool = false
     if let dict = args as? [String: Any] {
       if let v = dict["value"] as? NSNumber { initialValue = v.boolValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
+      if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
     }
 
     let model = SwitchModel(value: initialValue, enabled: enabled) { newValue in
@@ -23,6 +25,9 @@ class CupertinoSwitchPlatformView: NSObject, FlutterPlatformView {
     self.hostingController = UIHostingController(rootView: CupertinoSwitchView(model: model))
     self.hostingController.view.backgroundColor = .clear
     self.hostingController.view.isOpaque = false
+    if #available(iOS 13.0, *) {
+      self.hostingController.overrideUserInterfaceStyle = isDark ? .dark : .light
+    }
     super.init()
 
     channel.setMethodCallHandler { call, result in
@@ -37,6 +42,13 @@ class CupertinoSwitchPlatformView: NSObject, FlutterPlatformView {
           model.enabled = enabled
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
+      case "setBrightness":
+        if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
+          if #available(iOS 13.0, *) {
+            self.hostingController.overrideUserInterfaceStyle = isDark ? .dark : .light
+          }
+          result(nil)
+        } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -47,4 +59,3 @@ class CupertinoSwitchPlatformView: NSObject, FlutterPlatformView {
     return hostingController.view
   }
 }
-
