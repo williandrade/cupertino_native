@@ -13,9 +13,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     let switchFactory = CupertinoSwitchViewFactory(messenger: registrar.messenger)
     registrar.register(switchFactory, withId: "CupertinoNativeSwitch")
 
-    // Button will be registered when implemented
-    let buttonFactory = CupertinoButtonViewFactory(messenger: registrar.messenger)
-    registrar.register(buttonFactory, withId: "CupertinoNativeButton")
+    // Button registration removed
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
