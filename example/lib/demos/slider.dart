@@ -11,6 +11,7 @@ class SliderDemoPage extends StatefulWidget {
 class _SliderDemoPageState extends State<SliderDemoPage> {
   double _fullWidthValue = 50;
   double _halfWidthValue = 25;
+  double _pinkValue = 30;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +31,17 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
               onChanged: (v) => setState(() => _fullWidthValue = v),
             ),
             Text('Value: ${_fullWidthValue.toStringAsFixed(1)}'),
+            const SizedBox(height: 24),
+            const Text('Tinted slider (systemPink)'),
+            CNSlider(
+              value: _pinkValue,
+              min: 0,
+              max: 100,
+              enabled: true,
+              color: CupertinoColors.systemPink,
+              onChanged: (v) => setState(() => _pinkValue = v),
+            ),
+            Text('Value: ${_pinkValue.toStringAsFixed(1)}'),
             const SizedBox(height: 24),
             const Text('Half width slider'),
             Align(

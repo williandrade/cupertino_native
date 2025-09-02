@@ -9,6 +9,7 @@ struct CupertinoSliderView: View {
       .onChange(of: model.value) { newValue in
         model.onChange(newValue)
       }
+      .accentColor(model.tintColor)
   }
 }
 
@@ -17,6 +18,7 @@ class SliderModel: ObservableObject {
   @Published var min: Double
   @Published var max: Double
   @Published var enabled: Bool
+  @Published var tintColor: Color = .accentColor
   var onChange: (Double) -> Void
 
   init(value: Double, min: Double, max: Double, enabled: Bool, onChange: @escaping (Double) -> Void) {
@@ -27,4 +29,3 @@ class SliderModel: ObservableObject {
     self.onChange = onChange
   }
 }
-

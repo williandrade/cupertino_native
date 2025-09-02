@@ -14,12 +14,16 @@ class CupertinoSliderNSView: NSView {
     var maxValue: Double = 1
     var enabled: Bool = true
     var isDark: Bool = false
+    var initialTint: NSColor? = nil
     if let dict = args as? [String: Any] {
       if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
       if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
       if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
+      if let style = dict["style"] as? [String: Any], let tintNum = style["tint"] as? NSNumber {
+        initialTint = Self.colorFromARGB(tintNum.intValue)
+      }
     }
 
     var channelRef: FlutterMethodChannel? = nil
@@ -65,6 +69,14 @@ class CupertinoSliderNSView: NSView {
           model.enabled = enabled
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
+      case "setStyle":
+        if let args = call.arguments as? [String: Any] {
+          if let tintNum = args["tint"] as? NSNumber {
+            let ns = Self.colorFromARGB(tintNum.intValue)
+            model.tintColor = Color(ns)
+          }
+          result(nil)
+        } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
       case "setBrightness":
         if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
           self.hostingController.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -72,11 +84,22 @@ class CupertinoSliderNSView: NSView {
         } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
       default:
         result(FlutterMethodNotImplemented)
+    if let tint = initialTint {
+      model.tintColor = Color(tint)
+    }
       }
     }
   }
 
   required init?(coder: NSCoder) {
     return nil
+  }
+
+  private static func colorFromARGB(_ argb: Int) -> NSColor {
+    let a = CGFloat((argb >> 24) & 0xFF) / 255.0
+    let r = CGFloat((argb >> 16) & 0xFF) / 255.0
+    let g = CGFloat((argb >> 8) & 0xFF) / 255.0
+    let b = CGFloat(argb & 0xFF) / 255.0
+    return NSColor(srgbRed: r, green: g, blue: b, alpha: a)
   }
 }

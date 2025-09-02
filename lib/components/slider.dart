@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
+import '../channel/params.dart';
 
 class CNSliderController {
   MethodChannel? _channel;
@@ -47,6 +48,7 @@ class CNSlider extends StatefulWidget {
     this.enabled = true,
     this.controller,
     this.height = 44.0,
+    this.color,
   });
 
   final double value;
@@ -56,6 +58,7 @@ class CNSlider extends StatefulWidget {
   final ValueChanged<double> onChanged;
   final CNSliderController? controller;
   final double height;
+  final Color? color;
 
   @override
   State<CNSlider> createState() => _CNSliderState();
@@ -69,6 +72,7 @@ class _CNSliderState extends State<CNSlider> {
   double? _lastMax;
   bool? _lastEnabled;
   bool? _lastIsDark;
+  int? _lastTint;
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   CNSliderController? _internalController;
@@ -105,7 +109,7 @@ class _CNSliderState extends State<CNSlider> {
         height: widget.height,
         width: double.infinity,
         child: Slider(
-          value: widget.value.clamp(widget.min, widget.max),
+          value: widget.value.clamp(widget.min, widget.max).toDouble(),
           min: widget.min,
           max: widget.max,
           onChanged: widget.enabled ? widget.onChanged : null,
@@ -120,6 +124,7 @@ class _CNSliderState extends State<CNSlider> {
       'value': widget.value,
       'enabled': widget.enabled,
       'isDark': _isDark,
+      'style': encodeStyle(context, tint: widget.color),
     };
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -195,11 +200,15 @@ class _CNSliderState extends State<CNSlider> {
     _lastMax = widget.max;
     _lastEnabled = widget.enabled;
     _lastIsDark = _isDark;
+    _lastTint = resolveColorToArgb(widget.color, context);
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
+
+    // Resolve any context-dependent values before awaiting.
+    final int? tint = resolveColorToArgb(widget.color, context);
 
     if (_lastMin != widget.min || _lastMax != widget.max) {
       await channel.invokeMethod('setRange', {
@@ -215,13 +224,21 @@ class _CNSliderState extends State<CNSlider> {
       _lastEnabled = widget.enabled;
     }
 
-    final clamped = widget.value.clamp(widget.min, widget.max);
+    final double clamped = widget.value.clamp(widget.min, widget.max).toDouble();
     if (_lastValue != clamped) {
       await channel.invokeMethod('setValue', {
         'value': clamped,
         'animated': false,
       });
       _lastValue = clamped;
+    }
+
+    // Style updates (e.g., tint color)
+    if (_lastTint != tint && tint != null) {
+      await channel.invokeMethod('setStyle', {
+        'tint': tint,
+      });
+      _lastTint = tint;
     }
   }
 

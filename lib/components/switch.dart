@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
+import '../channel/params.dart';
 
 class CNSwitchController {
   MethodChannel? _channel;
@@ -102,6 +103,7 @@ class _CNSwitchState extends State<CNSwitch> {
       'value': widget.value,
       'enabled': widget.enabled,
       'isDark': _isDark,
+      'style': encodeStyle(context),
     };
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
