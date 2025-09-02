@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 
 class CNSliderController {
   MethodChannel? _channel;
@@ -119,6 +120,16 @@ class _CNSliderState extends State<CNSlider> {
           creationParamsCodec: const StandardMessageCodec(),
           creationParams: creationParams,
           onPlatformViewCreated: _onPlatformViewCreated,
+          // Forward horizontal drags and taps to the native slider so it
+          // works correctly inside Flutter scroll views.
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+            Factory<HorizontalDragGestureRecognizer>(
+              () => HorizontalDragGestureRecognizer(),
+            ),
+            Factory<TapGestureRecognizer>(
+              () => TapGestureRecognizer(),
+            ),
+          },
         ),
       );
     }
@@ -133,6 +144,15 @@ class _CNSliderState extends State<CNSlider> {
         creationParamsCodec: const StandardMessageCodec(),
         creationParams: creationParams,
         onPlatformViewCreated: _onPlatformViewCreated,
+        // Mirror iOS behavior: allow horizontal drag/tap gestures through.
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+          Factory<HorizontalDragGestureRecognizer>(
+            () => HorizontalDragGestureRecognizer(),
+          ),
+          Factory<TapGestureRecognizer>(
+            () => TapGestureRecognizer(),
+          ),
+        },
       ),
     );
   }
