@@ -245,10 +245,18 @@ class _CNSliderState extends State<CNSlider> {
   Future<void> _syncBrightnessIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
+    // Resolve theme-dependent values before awaiting.
     final isDark = _isDark;
+    final int? tint = resolveColorToArgb(widget.color, context);
+
     if (_lastIsDark != isDark) {
       await channel.invokeMethod('setBrightness', {'isDark': isDark});
       _lastIsDark = isDark;
+    }
+
+    if (_lastTint != tint && tint != null) {
+      await channel.invokeMethod('setStyle', {'tint': tint});
+      _lastTint = tint;
     }
   }
 }
