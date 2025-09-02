@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'demos/slider.dart';
+import 'demos/switch.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,6 +38,17 @@ class HomePage extends StatelessWidget {
                     Navigator.of(context).push(
                       CupertinoPageRoute(
                         builder: (_) => const SliderDemoPage(),
+                      ),
+                    );
+                  },
+                ),
+                CupertinoListTile(
+                  title: Text('Switch'),
+                  trailing: CupertinoListTileChevron(),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (_) => const SwitchDemoPage(),
                       ),
                     );
                   },
