@@ -13,7 +13,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     let switchFactory = CupertinoSwitchViewFactory(messenger: registrar.messenger)
     registrar.register(switchFactory, withId: "CupertinoNativeSwitch")
 
-    // Button registration removed
+    let segmentedFactory = CupertinoSegmentedControlViewFactory(messenger: registrar.messenger)
+    registrar.register(segmentedFactory, withId: "CupertinoNativeSegmentedControl")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
