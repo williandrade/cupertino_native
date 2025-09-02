@@ -28,16 +28,17 @@ class _MyAppState extends State<MyApp> {
       theme: CupertinoThemeData(
         brightness: _isDarkMode ? Brightness.dark : Brightness.light,
       ),
-      home: HomePage(
-        isDarkMode: _isDarkMode,
-        onToggleTheme: _toggleTheme,
-      ),
+      home: HomePage(isDarkMode: _isDarkMode, onToggleTheme: _toggleTheme),
     );
   }
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key, required this.isDarkMode, required this.onToggleTheme});
+  const HomePage({
+    super.key,
+    required this.isDarkMode,
+    required this.onToggleTheme,
+  });
 
   final bool isDarkMode;
   final VoidCallback onToggleTheme;
