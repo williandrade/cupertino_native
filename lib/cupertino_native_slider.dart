@@ -139,7 +139,7 @@ class _CupertinoNativeSliderState extends State<CupertinoNativeSlider> {
   }
 
   void _onPlatformViewCreated(int id) {
-    final channel = MethodChannel('CupertinoNativeSlider_\$id');
+    final channel = MethodChannel('CupertinoNativeSlider_$id');
     _channel = channel;
     _controller._attach(channel);
     channel.setMethodCallHandler(_onMethodCall);
