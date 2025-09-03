@@ -17,7 +17,7 @@ class _TabBarDemoPageState extends State<TabBarDemoPage>
   @override
   void initState() {
     super.initState();
-    _controller = TabController(length: 3, vsync: this);
+    _controller = TabController(length: 4, vsync: this);
     _controller.addListener(() {
       final i = _controller.index;
       if (i != _index) setState(() => _index = i);
@@ -33,56 +33,89 @@ class _TabBarDemoPageState extends State<TabBarDemoPage>
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Native Tab Bar')),
-      child: SafeArea(
-        child: Stack(
-          children: [
-            // Content below
-            Positioned.fill(
-              child: TabBarView(
-                controller: _controller,
-                children: const [
-                  _TabPage(title: 'Home', color: CupertinoColors.systemGroupedBackground),
-                  _TabPage(title: 'Search', color: CupertinoColors.systemGrey5),
-                  _TabPage(title: 'Profile', color: CupertinoColors.systemGrey6),
-                ],
-              ),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Native Tab Bar'),
+      ),
+      child: Stack(
+        children: [
+          // Content below
+          Positioned.fill(
+            child: TabBarView(
+              controller: _controller,
+              children: const [
+                _ImageTabPage(asset: 'assets/home.jpg', label: 'Home'),
+                _ImageTabPage(asset: 'assets/profile.jpg', label: 'Profile'),
+                _ImageTabPage(asset: 'assets/settings.jpg', label: 'Settings'),
+                _ImageTabPage(asset: 'assets/search.jpg', label: 'Search'),
+              ],
             ),
-            // Native tab bar overlay
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: CNTabBar(
-                items: const [
-                  CNTabBarItem(label: 'Home', icon: CNSymbol('house.fill', size: 22)),
-                  CNTabBarItem(label: 'Search', icon: CNSymbol('magnifyingglass', size: 22)),
-                  CNTabBarItem(label: 'Profile', icon: CNSymbol('person.crop.circle', size: 22)),
-                ],
-                currentIndex: _index,
-                tint: CupertinoColors.activeBlue,
-                onTap: (i) {
-                  setState(() => _index = i);
-                  _controller.animateTo(i);
-                },
-              ),
+          ),
+          // Native tab bar overlay
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: CNTabBar(
+              items: const [
+                CNTabBarItem(
+                  label: 'Home',
+                  icon: CNSymbol('house.fill', size: 22),
+                ),
+                CNTabBarItem(
+                  label: 'Profile',
+                  icon: CNSymbol('person.crop.circle', size: 22),
+                ),
+                CNTabBarItem(
+                  label: 'Settings',
+                  icon: CNSymbol('gearshape.fill', size: 22),
+                ),
+                CNTabBarItem(
+                  label: 'Search',
+                  icon: CNSymbol('magnifyingglass', size: 22),
+                ),
+              ],
+              currentIndex: _index,
+              tint: CupertinoColors.activeBlue,
+              onTap: (i) {
+                setState(() => _index = i);
+                _controller.animateTo(i);
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _TabPage extends StatelessWidget {
-  const _TabPage({required this.title, required this.color});
-  final String title;
-  final Color color;
+class _ImageTabPage extends StatelessWidget {
+  const _ImageTabPage({required this.asset, required this.label});
+  final String asset;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: color,
-      alignment: Alignment.center,
-      child: Text(title, style: const TextStyle(fontSize: 20)),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.asset(asset, fit: BoxFit.cover),
+        Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: CupertinoColors.black.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.only(top: 12),
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 18,
+                color: CupertinoColors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -112,6 +112,11 @@ class HomePage extends StatelessWidget {
                   },
                 ),
                 // Button demo removed
+              ],
+            ),
+            CupertinoListSection.insetGrouped(
+              header: Text('Navigation'),
+              children: [
                 CupertinoListTile(
                   title: Text('Tab Bar'),
                   trailing: CupertinoListTileChevron(),
