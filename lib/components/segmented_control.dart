@@ -16,6 +16,11 @@ class CNSegmentedControl extends StatefulWidget {
     this.height = 32.0,
     this.shrinkWrap = false,
     this.sfSymbols,
+    this.iconSize,
+    this.iconColor,
+    this.iconPaletteColors,
+    this.iconGradientEnabled,
+    this.iconRenderingMode,
   });
 
   final List<String> labels;
@@ -26,6 +31,11 @@ class CNSegmentedControl extends StatefulWidget {
   final double height;
   final bool shrinkWrap;
   final List<CNSFSymbol>? sfSymbols;
+  final double? iconSize;
+  final Color? iconColor;
+  final List<Color>? iconPaletteColors;
+  final bool? iconGradientEnabled;
+  final CNSFSymbolRenderingMode? iconRenderingMode;
 
   @override
   State<CNSegmentedControl> createState() => _CNSegmentedControlState();
@@ -82,9 +92,41 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
       'selectedIndex': widget.selectedIndex,
       'enabled': widget.enabled,
       'isDark': _isDark,
-      'style': encodeStyle(context, tint: widget.tint),
+      'style': encodeStyle(context, tint: widget.tint)
+        ..addAll({
+          if (widget.iconSize != null) 'iconSize': widget.iconSize,
+          if (widget.iconColor != null) 'iconColor': resolveColorToArgb(widget.iconColor, context),
+          if (widget.iconPaletteColors != null)
+            'iconPaletteColors': widget.iconPaletteColors!
+                .map((c) => resolveColorToArgb(c, context))
+                .toList(),
+          if (widget.iconGradientEnabled != null)
+            'iconGradientEnabled': widget.iconGradientEnabled,
+          if (widget.iconRenderingMode != null)
+            'iconRenderingMode': widget.iconRenderingMode!.name,
+        }),
       if (widget.sfSymbols != null)
         'sfSymbols': widget.sfSymbols!.map((e) => e.name).toList(),
+      if (widget.sfSymbols != null)
+        'sfSymbolSizes': widget.sfSymbols!.map((e) => e.size).toList(),
+      if (widget.sfSymbols != null)
+        'sfSymbolColors': widget.sfSymbols!
+            .map((e) => resolveColorToArgb(e.color, context))
+            .toList(),
+      if (widget.sfSymbols != null)
+        'sfSymbolPaletteColors': widget.sfSymbols!
+            .map((e) => (e.paletteColors ?? [])
+                .map((c) => resolveColorToArgb(c, context))
+                .toList())
+            .toList(),
+      if (widget.sfSymbols != null)
+        'sfSymbolRenderingModes': widget.sfSymbols!
+            .map((e) => e.mode?.name)
+            .toList(),
+      if (widget.sfSymbols != null)
+        'sfSymbolGradientEnabled': widget.sfSymbols!
+            .map((e) => e.gradient)
+            .toList(),
     };
 
     Widget platformView;

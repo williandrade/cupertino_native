@@ -4,6 +4,14 @@ import Cocoa
 class CupertinoSegmentedControlNSView: NSView {
   private let channel: FlutterMethodChannel
   private let control: NSSegmentedControl
+  private var labels: [String] = []
+  private var symbols: [String] = []
+  private var perSymbolSizes: [CGFloat?] = []
+  private var defaultIconSize: CGFloat? = nil
+  private var perSymbolModes: [String?] = []
+  private var perSymbolGradientEnabled: [NSNumber?] = []
+  private var defaultIconRenderingMode: String? = nil
+  private var defaultIconGradientEnabled: Bool = false
 
   init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
     self.channel = FlutterMethodChannel(name: "CupertinoNativeSegmentedControl_\(viewId)", binaryMessenger: messenger)
@@ -19,11 +27,17 @@ class CupertinoSegmentedControlNSView: NSView {
     if let dict = args as? [String: Any] {
       if let arr = dict["labels"] as? [String] { labels = arr }
       if let arr = dict["sfSymbols"] as? [String] { sfSymbols = arr }
+      if let sizes = dict["sfSymbolSizes"] as? [NSNumber] { self.perSymbolSizes = sizes.map { CGFloat(truncating: $0) } }
+      if let modes = dict["sfSymbolRenderingModes"] as? [String?] { self.perSymbolModes = modes }
+      if let gradients = dict["sfSymbolGradientEnabled"] as? [NSNumber?] { self.perSymbolGradientEnabled = gradients }
       if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
-      if let style = dict["style"] as? [String: Any], let n = style["tint"] as? NSNumber {
-        tint = Self.colorFromARGB(n.intValue)
+      if let style = dict["style"] as? [String: Any] {
+        if let n = style["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
+        if let s = style["iconSize"] as? NSNumber { self.defaultIconSize = CGFloat(truncating: s) }
+        if let mode = style["iconRenderingMode"] as? String { self.defaultIconRenderingMode = mode }
+        if let g = style["iconGradientEnabled"] as? NSNumber { self.defaultIconGradientEnabled = g.boolValue }
       }
     }
 
@@ -33,7 +47,9 @@ class CupertinoSegmentedControlNSView: NSView {
     layer?.backgroundColor = NSColor.clear.cgColor
     appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
 
-    configureSegments(labels: labels, sfSymbols: sfSymbols)
+    self.labels = labels
+    self.symbols = sfSymbols
+    configureSegments()
     if selectedIndex >= 0 { control.selectedSegment = selectedIndex }
     control.isEnabled = enabled
     if #available(macOS 10.15, *), let c = tint { control.contentTintColor = c }
@@ -71,6 +87,8 @@ class CupertinoSegmentedControlNSView: NSView {
           if #available(macOS 10.15, *), let n = args["tint"] as? NSNumber {
             self.control.contentTintColor = Self.colorFromARGB(n.intValue)
           }
+          if let s = args["iconSize"] as? NSNumber { self.defaultIconSize = CGFloat(truncating: s) }
+          self.configureSegments()
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
       case "setBrightness":
@@ -86,11 +104,39 @@ class CupertinoSegmentedControlNSView: NSView {
 
   required init?(coder: NSCoder) { return nil }
 
-  private func configureSegments(labels: [String], sfSymbols: [String]) {
-    let count = max(labels.count, sfSymbols.count)
+  private func configureSegments() {
+    let count = max(labels.count, symbols.count)
     control.segmentCount = count
     for i in 0..<count {
-      if i < sfSymbols.count, #available(macOS 11.0, *), let image = NSImage(systemSymbolName: sfSymbols[i], accessibilityDescription: nil) {
+      if i < symbols.count, #available(macOS 11.0, *), var image = NSImage(systemSymbolName: symbols[i], accessibilityDescription: nil) {
+        if let size = (i < perSymbolSizes.count ? perSymbolSizes[i] : nil) ?? defaultIconSize {
+          if let cfg = NSImage.SymbolConfiguration(pointSize: size) {
+            image = image.withSymbolConfiguration(cfg) ?? image
+          }
+        }
+        // Rendering mode selection (best-effort)
+        let mode = (i < perSymbolModes.count ? perSymbolModes[i] : nil) ?? defaultIconRenderingMode
+        if let mode = mode {
+          switch mode {
+          case "hierarchical":
+            if #available(macOS 12.0, *), let color = control.contentTintColor { // global only
+              if let cfg = NSImage.SymbolConfiguration(hierarchicalColor: color) {
+                image = image.withSymbolConfiguration(cfg) ?? image
+              }
+            }
+          case "palette":
+            // macOS lacks easy per-icon palette with NSImage API; rely on contentTintColor
+            break
+          case "multicolor":
+            if #available(macOS 12.0, *) {
+              if let cfg = NSImage.SymbolConfiguration.preferringMulticolor() {
+                image = image.withSymbolConfiguration(cfg) ?? image
+              }
+            }
+          default:
+            break
+          }
+        }
         control.setImage(image, forSegment: i)
       } else if i < labels.count {
         control.setLabel(labels[i], forSegment: i)
