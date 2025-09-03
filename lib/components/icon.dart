@@ -13,7 +13,6 @@ class CNIcon extends StatefulWidget {
     this.color,
     this.mode,
     this.gradient,
-    this.shrinkWrap = false,
     this.height,
   });
 
@@ -22,7 +21,6 @@ class CNIcon extends StatefulWidget {
   final Color? color;
   final CNSFSymbolRenderingMode? mode;
   final bool? gradient;
-  final bool shrinkWrap;
   final double? height;
 
   @override
@@ -37,8 +35,7 @@ class _CNIconState extends State<CNIcon> {
   int? _lastColor;
   String? _lastMode;
   bool? _lastGradient;
-  double? _intrinsicWidth;
-  double? _intrinsicHeight;
+  // No intrinsic sizing storage; icons use explicit size.
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
@@ -100,11 +97,6 @@ class _CNIconState extends State<CNIcon> {
 
     // Ensure the platform view always has finite constraints
     final fallbackSize = widget.size ?? widget.symbol.size ?? 24.0;
-    if (widget.shrinkWrap) {
-      final w = _intrinsicWidth ?? fallbackSize;
-      final h = widget.height ?? _intrinsicHeight ?? fallbackSize;
-      return SizedBox(width: w, height: h, child: platformView);
-    }
     final h = widget.height ?? fallbackSize;
     final w = fallbackSize;
     return SizedBox(width: w, height: h, child: platformView);
@@ -115,7 +107,7 @@ class _CNIconState extends State<CNIcon> {
       ..setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
     _syncBrightnessIfNeeded();
-    _requestIntrinsicSize();
+    // No intrinsic measurement needed.
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -179,19 +171,5 @@ class _CNIconState extends State<CNIcon> {
     }
   }
 
-  Future<void> _requestIntrinsicSize() async {
-    final channel = _channel;
-    if (channel == null) return;
-    try {
-      // Resolve context-independent params only; avoid using context after await.
-      final result = await channel.invokeMethod<Map>('getIntrinsicSize');
-      final w = (result?['width'] as num?)?.toDouble();
-      final h = (result?['height'] as num?)?.toDouble();
-      if (!mounted) return;
-      setState(() {
-        _intrinsicWidth = w;
-        _intrinsicHeight = h;
-      });
-    } catch (_) {}
-  }
+  // No intrinsic sizing API: platform view is wrapped with fixed constraints.
 }
