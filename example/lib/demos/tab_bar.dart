@@ -67,13 +67,12 @@ class _TabBarDemoPageState extends State<TabBarDemoPage>
                   label: 'Settings',
                   icon: CNSymbol('gearshape.fill', size: 22),
                 ),
-                CNTabBarItem(
-                  label: 'Search',
-                  icon: CNSymbol('magnifyingglass', size: 22),
-                ),
+                CNTabBarItem(icon: CNSymbol('magnifyingglass', size: 22)),
               ],
               currentIndex: _index,
-              tint: CupertinoColors.activeBlue,
+              split: true,
+              rightCount: 1,
+              shrinkCentered: true,
               onTap: (i) {
                 setState(() => _index = i);
                 _controller.animateTo(i);

@@ -21,6 +21,9 @@ class CNTabBar extends StatefulWidget {
     this.backgroundColor,
     this.iconSize,
     this.height,
+    this.split = false,
+    this.rightCount = 1,
+    this.shrinkCentered = true,
   });
 
   final List<CNTabBarItem> items;
@@ -30,6 +33,9 @@ class CNTabBar extends StatefulWidget {
   final Color? backgroundColor;
   final double? iconSize;
   final double? height;
+  final bool split;
+  final int rightCount; // how many trailing items to pin right when split
+  final bool shrinkCentered;
 
   @override
   State<CNTabBar> createState() => _CNTabBarState();
@@ -41,6 +47,12 @@ class _CNTabBarState extends State<CNTabBar> {
   int? _lastTint;
   int? _lastBg;
   double? _intrinsicHeight;
+  double? _intrinsicWidth;
+  List<String>? _lastLabels;
+  List<String>? _lastSymbols;
+  bool? _lastSplit;
+  int? _lastRightCount;
+  
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
@@ -80,8 +92,8 @@ class _CNTabBarState extends State<CNTabBar> {
       );
     }
 
-    final labels = widget.items.map((e) => e.label).toList();
-    final symbols = widget.items.map((e) => e.icon?.name).toList();
+    final labels = widget.items.map((e) => e.label ?? '').toList();
+    final symbols = widget.items.map((e) => e.icon?.name ?? '').toList();
     final sizes = widget.items.map((e) => (widget.iconSize ?? e.icon?.size)).toList();
     final colors = widget.items
         .map((e) => resolveColorToArgb(e.icon?.color, context))
@@ -94,6 +106,8 @@ class _CNTabBarState extends State<CNTabBar> {
       'sfSymbolColors': colors,
       'selectedIndex': widget.currentIndex,
       'isDark': _isDark,
+      'split': widget.split,
+      'rightCount': widget.rightCount,
       'style': encodeStyle(context, tint: widget.tint)
         ..addAll({
           if (widget.backgroundColor != null)
@@ -117,6 +131,10 @@ class _CNTabBarState extends State<CNTabBar> {
           );
 
     final h = widget.height ?? _intrinsicHeight ?? 50.0;
+    if (!widget.split && widget.shrinkCentered) {
+      final w = _intrinsicWidth;
+      return SizedBox(height: h, width: w, child: platformView);
+    }
     return SizedBox(height: h, child: platformView);
   }
 
@@ -128,6 +146,9 @@ class _CNTabBarState extends State<CNTabBar> {
     _lastTint = resolveColorToArgb(widget.tint, context);
     _lastBg = resolveColorToArgb(widget.backgroundColor, context);
     _requestIntrinsicSize();
+    _cacheItems();
+    _lastSplit = widget.split;
+    _lastRightCount = widget.rightCount;
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -165,6 +186,40 @@ class _CNTabBarState extends State<CNTabBar> {
     if (style.isNotEmpty) {
       await ch.invokeMethod('setStyle', style);
     }
+
+    // Items update (for hot reload or dynamic changes)
+    final labels = widget.items.map((e) => e.label ?? '').toList();
+    final symbols = widget.items.map((e) => e.icon?.name ?? '').toList();
+    if (_lastLabels?.join('|') != labels.join('|') ||
+        _lastSymbols?.join('|') != symbols.join('|')) {
+      await ch.invokeMethod('setItems', {
+        'labels': labels,
+        'sfSymbols': symbols,
+        'selectedIndex': widget.currentIndex,
+      });
+      _lastLabels = labels;
+      _lastSymbols = symbols;
+      // Re-measure width in case content changed
+      _requestIntrinsicSize();
+    }
+
+    // Layout updates (split / insets)
+    if (_lastSplit != widget.split ||
+        _lastRightCount != widget.rightCount) {
+      await ch.invokeMethod('setLayout', {
+        'split': widget.split,
+        'rightCount': widget.rightCount,
+        'selectedIndex': widget.currentIndex,
+      });
+      _lastSplit = widget.split;
+      _lastRightCount = widget.rightCount;
+      _requestIntrinsicSize();
+    }
+  }
+
+  void _cacheItems() {
+    _lastLabels = widget.items.map((e) => e.label ?? '').toList();
+    _lastSymbols = widget.items.map((e) => e.icon?.name ?? '').toList();
   }
 
   Future<void> _requestIntrinsicSize() async {
@@ -174,10 +229,12 @@ class _CNTabBarState extends State<CNTabBar> {
     try {
       final size = await ch.invokeMethod<Map>('getIntrinsicSize');
       final h = (size?['height'] as num?)?.toDouble();
+      final w = (size?['width'] as num?)?.toDouble();
       if (!mounted) return;
-      if (h != null && h > 0 && _intrinsicHeight != h) {
-        setState(() => _intrinsicHeight = h);
-      }
+      setState(() {
+        if (h != null && h > 0) _intrinsicHeight = h;
+        if (w != null && w > 0) _intrinsicWidth = w;
+      });
     } catch (_) {}
   }
 }
