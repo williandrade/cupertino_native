@@ -30,7 +30,7 @@ class CNSegmentedControl extends StatefulWidget {
   final Color? tint;
   final double height;
   final bool shrinkWrap;
-  final List<CNSFSymbol>? sfSymbols;
+  final List<CNSymbol>? sfSymbols;
   final double? iconSize;
   final Color? iconColor;
   final List<Color>? iconPaletteColors;

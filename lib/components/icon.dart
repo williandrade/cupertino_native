@@ -16,7 +16,7 @@ class CNIcon extends StatefulWidget {
     this.height,
   });
 
-  final CNSFSymbol symbol;
+  final CNSymbol symbol;
   final double? size;
   final Color? color;
   final CNSFSymbolRenderingMode? mode;
@@ -66,8 +66,7 @@ class _CNIconState extends State<CNIcon> {
       'name': symbol.name,
       'isDark': _isDark,
       'style': <String, dynamic>{
-        if ((widget.size ?? symbol.size) != null)
-          'iconSize': (widget.size ?? symbol.size),
+        'iconSize': (widget.size ?? symbol.size),
         if ((widget.color ?? symbol.color) != null)
           'iconColor': resolveColorToArgb(widget.color ?? symbol.color, context),
         if ((widget.mode ?? symbol.mode) != null)
@@ -96,7 +95,7 @@ class _CNIconState extends State<CNIcon> {
           );
 
     // Ensure the platform view always has finite constraints
-    final fallbackSize = widget.size ?? widget.symbol.size ?? 24.0;
+    final fallbackSize = widget.size ?? widget.symbol.size;
     final h = widget.height ?? fallbackSize;
     final w = fallbackSize;
     return SizedBox(width: w, height: h, child: platformView);
@@ -140,7 +139,7 @@ class _CNIconState extends State<CNIcon> {
     }
 
     final style = <String, dynamic>{};
-    if (_lastSize != size && size != null) {
+    if (_lastSize != size) {
       style['iconSize'] = size;
       _lastSize = size;
     }

@@ -56,9 +56,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               child: CNSegmentedControl(
                 labels: const [],
                 sfSymbols: const [
-                  CNSFSymbol('heart.fill'),
-                  CNSFSymbol('star.fill'),
-                  CNSFSymbol('bell.fill'),
+                  CNSymbol('heart.fill'),
+                  CNSymbol('star.fill'),
+                  CNSymbol('bell.fill'),
                 ],
                 selectedIndex: _index3,
                 iconSize: 20,
@@ -73,9 +73,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               child: CNSegmentedControl(
                 labels: const [],
                 sfSymbols: const [
-                  CNSFSymbol('heart.fill', size: 22, color: CupertinoColors.systemPink),
-                  CNSFSymbol('star.fill', size: 18, color: CupertinoColors.systemYellow),
-                  CNSFSymbol('bell.fill', size: 26, color: CupertinoColors.systemBlue),
+                  CNSymbol('heart.fill', size: 22, color: CupertinoColors.systemPink),
+                  CNSymbol('star.fill', size: 18, color: CupertinoColors.systemYellow),
+                  CNSymbol('bell.fill', size: 26, color: CupertinoColors.systemBlue),
                 ],
                 selectedIndex: _index4,
                 shrinkWrap: true,
@@ -89,9 +89,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               child: CNSegmentedControl(
                 labels: const [],
                 sfSymbols: const [
-                  CNSFSymbol('heart.fill', gradient: true),
-                  CNSFSymbol('star.fill', gradient: true),
-                  CNSFSymbol('bell.fill', gradient: true),
+                  CNSymbol('heart.fill', gradient: true),
+                  CNSymbol('star.fill', gradient: true),
+                  CNSymbol('bell.fill', gradient: true),
                 ],
                 selectedIndex: _index1,
                 iconColor: CupertinoColors.systemPink,
@@ -106,9 +106,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               child: CNSegmentedControl(
                 labels: const [],
                 sfSymbols: const [
-                  CNSFSymbol('heart.fill', mode: CNSFSymbolRenderingMode.monochrome),
-                  CNSFSymbol('star.fill', mode: CNSFSymbolRenderingMode.monochrome),
-                  CNSFSymbol('bell.fill', mode: CNSFSymbolRenderingMode.monochrome),
+                  CNSymbol('heart.fill', mode: CNSFSymbolRenderingMode.monochrome),
+                  CNSymbol('star.fill', mode: CNSFSymbolRenderingMode.monochrome),
+                  CNSymbol('bell.fill', mode: CNSFSymbolRenderingMode.monochrome),
                 ],
                 selectedIndex: _index5,
                 iconRenderingMode: CNSFSymbolRenderingMode.monochrome,
@@ -124,9 +124,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               child: CNSegmentedControl(
                 labels: const [],
                 sfSymbols: const [
-                  CNSFSymbol('heart.fill', mode: CNSFSymbolRenderingMode.hierarchical),
-                  CNSFSymbol('star.fill', mode: CNSFSymbolRenderingMode.hierarchical),
-                  CNSFSymbol('bell.fill', mode: CNSFSymbolRenderingMode.hierarchical),
+                  CNSymbol('heart.fill', mode: CNSFSymbolRenderingMode.hierarchical),
+                  CNSymbol('star.fill', mode: CNSFSymbolRenderingMode.hierarchical),
+                  CNSymbol('bell.fill', mode: CNSFSymbolRenderingMode.hierarchical),
                 ],
                 selectedIndex: _index6,
                 iconRenderingMode: CNSFSymbolRenderingMode.hierarchical,
@@ -142,9 +142,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               child: CNSegmentedControl(
                 labels: const [],
                 sfSymbols: const [
-                  CNSFSymbol('heart.fill', mode: CNSFSymbolRenderingMode.palette),
-                  CNSFSymbol('star.fill', mode: CNSFSymbolRenderingMode.palette),
-                  CNSFSymbol('bell.fill', mode: CNSFSymbolRenderingMode.palette),
+                  CNSymbol('heart.fill', mode: CNSFSymbolRenderingMode.palette),
+                  CNSymbol('star.fill', mode: CNSFSymbolRenderingMode.palette),
+                  CNSymbol('bell.fill', mode: CNSFSymbolRenderingMode.palette),
                 ],
                 selectedIndex: _index7,
                 iconRenderingMode: CNSFSymbolRenderingMode.palette,
@@ -163,9 +163,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               child: CNSegmentedControl(
                 labels: const [],
                 sfSymbols: const [
-                  CNSFSymbol('heart.fill', mode: CNSFSymbolRenderingMode.multicolor),
-                  CNSFSymbol('star.fill', mode: CNSFSymbolRenderingMode.multicolor),
-                  CNSFSymbol('bell.fill', mode: CNSFSymbolRenderingMode.multicolor),
+                  CNSymbol('heart.fill', mode: CNSFSymbolRenderingMode.multicolor),
+                  CNSymbol('star.fill', mode: CNSFSymbolRenderingMode.multicolor),
+                  CNSymbol('bell.fill', mode: CNSFSymbolRenderingMode.multicolor),
                 ],
                 selectedIndex: _index8,
                 iconRenderingMode: CNSFSymbolRenderingMode.multicolor,

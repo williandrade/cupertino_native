@@ -7,17 +7,17 @@ enum CNSFSymbolRenderingMode {
   multicolor,
 }
 
-class CNSFSymbol {
+class CNSymbol {
   final String name;
-  final double? size; // point size
+  final double size; // point size
   final Color? color; // preferred icon color (monochrome/hierarchical)
   final List<Color>? paletteColors; // multi-color palette
   final CNSFSymbolRenderingMode? mode; // per-icon rendering mode
   final bool? gradient; // prefer built-in gradient when available
 
-  const CNSFSymbol(
+  const CNSymbol(
     this.name, {
-    this.size,
+    this.size = 24.0,
     this.color,
     this.paletteColors,
     this.mode,
