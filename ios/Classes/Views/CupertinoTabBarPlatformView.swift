@@ -11,8 +11,9 @@ class CupertinoTabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelega
   private var rightCountVal: Int = 1
   private var currentLabels: [String] = []
   private var currentSymbols: [String] = []
-  private var leftInsetVal: CGFloat = 8
-  private var rightInsetVal: CGFloat = 8
+  private var leftInsetVal: CGFloat = 0
+  private var rightInsetVal: CGFloat = 0
+  private var splitSpacingVal: CGFloat = 8
 
   init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
     self.channel = FlutterMethodChannel(name: "CupertinoNativeTabBar_\(viewId)", binaryMessenger: messenger)
@@ -44,6 +45,7 @@ class CupertinoTabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelega
       }
       if let s = dict["split"] as? NSNumber { split = s.boolValue }
       if let rc = dict["rightCount"] as? NSNumber { rightCount = rc.intValue }
+      if let sp = dict["splitSpacing"] as? NSNumber { splitSpacingVal = CGFloat(truncating: sp) }
       // content insets controlled by Flutter padding; keep zero here
     }
 
@@ -90,7 +92,7 @@ class CupertinoTabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelega
       }
       container.addSubview(left); container.addSubview(right)
       // Compute content-fitting widths for both bars and apply symmetric spacing
-      let spacing: CGFloat = 8
+      let spacing: CGFloat = splitSpacingVal
       let leftWidth = left.sizeThatFits(.zero).width + leftInset * 2
       let rightWidth = right.sizeThatFits(.zero).width + rightInset * 2
       let total = leftWidth + rightWidth + spacing
@@ -198,8 +200,10 @@ channel.setMethodCallHandler { [weak self] call, result in
         if let args = call.arguments as? [String: Any] {
           let split = (args["split"] as? NSNumber)?.boolValue ?? false
           let rightCount = (args["rightCount"] as? NSNumber)?.intValue ?? 1
-          let leftInset = (args["leftContentInset"] as? NSNumber).map { CGFloat(truncating: $0) } ?? self.leftInsetVal
-          let rightInset = (args["rightContentInset"] as? NSNumber).map { CGFloat(truncating: $0) } ?? self.rightInsetVal
+          // Insets are controlled by Flutter padding; keep stored zeros here
+          let leftInset = self.leftInsetVal
+          let rightInset = self.rightInsetVal
+          if let sp = args["splitSpacing"] as? NSNumber { self.splitSpacingVal = CGFloat(truncating: sp) }
           let selectedIndex = (args["selectedIndex"] as? NSNumber)?.intValue ?? 0
           // Remove existing bars
           self.tabBar?.removeFromSuperview(); self.tabBar = nil
@@ -235,7 +239,7 @@ channel.setMethodCallHandler { [weak self] call, result in
             if selectedIndex < leftEnd, let items = left.items { left.selectedItem = items[selectedIndex]; right.selectedItem = nil }
             else if let items = right.items { let idx = selectedIndex - leftEnd; if idx >= 0 && idx < items.count { right.selectedItem = items[idx]; left.selectedItem = nil } }
             self.container.addSubview(left); self.container.addSubview(right)
-            let spacing: CGFloat = 8
+            let spacing: CGFloat = splitSpacingVal
             let leftWidth = left.sizeThatFits(.zero).width + leftInset * 2
             let rightWidth = right.sizeThatFits(.zero).width + rightInset * 2
             let total = leftWidth + rightWidth + spacing

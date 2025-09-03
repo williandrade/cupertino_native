@@ -24,6 +24,7 @@ class CNTabBar extends StatefulWidget {
     this.split = false,
     this.rightCount = 1,
     this.shrinkCentered = true,
+    this.splitSpacing = 8.0,
   });
 
   final List<CNTabBarItem> items;
@@ -36,6 +37,7 @@ class CNTabBar extends StatefulWidget {
   final bool split;
   final int rightCount; // how many trailing items to pin right when split
   final bool shrinkCentered;
+  final double splitSpacing; // gap between left/right halves when split
 
   @override
   State<CNTabBar> createState() => _CNTabBarState();
@@ -52,6 +54,7 @@ class _CNTabBarState extends State<CNTabBar> {
   List<String>? _lastSymbols;
   bool? _lastSplit;
   int? _lastRightCount;
+  double? _lastSplitSpacing;
   
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
@@ -108,6 +111,7 @@ class _CNTabBarState extends State<CNTabBar> {
       'isDark': _isDark,
       'split': widget.split,
       'rightCount': widget.rightCount,
+      'splitSpacing': widget.splitSpacing,
       'style': encodeStyle(context, tint: widget.tint)
         ..addAll({
           if (widget.backgroundColor != null)
@@ -149,6 +153,7 @@ class _CNTabBarState extends State<CNTabBar> {
     _cacheItems();
     _lastSplit = widget.split;
     _lastRightCount = widget.rightCount;
+    _lastSplitSpacing = widget.splitSpacing;
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -205,14 +210,17 @@ class _CNTabBarState extends State<CNTabBar> {
 
     // Layout updates (split / insets)
     if (_lastSplit != widget.split ||
-        _lastRightCount != widget.rightCount) {
+        _lastRightCount != widget.rightCount ||
+        _lastSplitSpacing != widget.splitSpacing) {
       await ch.invokeMethod('setLayout', {
         'split': widget.split,
         'rightCount': widget.rightCount,
+      'splitSpacing': widget.splitSpacing,
         'selectedIndex': widget.currentIndex,
       });
       _lastSplit = widget.split;
       _lastRightCount = widget.rightCount;
+    _lastSplitSpacing = widget.splitSpacing;
       _requestIntrinsicSize();
     }
   }
