@@ -102,9 +102,8 @@ class CupertinoIconNSView: NSView {
       switch mode {
       case "hierarchical":
         if #available(macOS 12.0, *), let c = color {
-          if let cfg = NSImage.SymbolConfiguration(hierarchicalColor: c) {
-            image = image.withSymbolConfiguration(cfg) ?? image
-          }
+          let cfg = NSImage.SymbolConfiguration(hierarchicalColor: c)
+          image = image.withSymbolConfiguration(cfg) ?? image
         }
       case "multicolor":
         if #available(macOS 12.0, *) {
@@ -150,4 +149,3 @@ private extension CupertinoIconNSView {
     return NSColor(srgbRed: r, green: g, blue: b, alpha: a)
   }
 }
-
