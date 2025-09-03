@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'demos/slider.dart';
 import 'demos/switch.dart';
 import 'demos/segmented_control.dart';
+import 'demos/tab_bar.dart';
 import 'demos/icon.dart';
 
 void main() {
@@ -111,6 +112,17 @@ class HomePage extends StatelessWidget {
                   },
                 ),
                 // Button demo removed
+                CupertinoListTile(
+                  title: Text('Tab Bar'),
+                  trailing: CupertinoListTileChevron(),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (_) => const TabBarDemoPage(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ],

@@ -4,6 +4,7 @@ export 'components/slider.dart';
 export 'components/switch.dart';
 export 'components/segmented_control.dart';
 export 'components/icon.dart';
+export 'components/tab_bar.dart';
 export 'style/sf_symbol.dart';
 // export 'components/button.dart'; // removed
 

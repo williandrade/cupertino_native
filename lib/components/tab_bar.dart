@@ -1,0 +1,183 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
+import '../channel/params.dart';
+import '../style/sf_symbol.dart';
+
+class CNTabBarItem {
+  const CNTabBarItem({this.label, this.icon});
+  final String? label;
+  final CNSymbol? icon;
+}
+
+class CNTabBar extends StatefulWidget {
+  const CNTabBar({
+    super.key,
+    required this.items,
+    required this.currentIndex,
+    required this.onTap,
+    this.tint,
+    this.backgroundColor,
+    this.iconSize,
+    this.height,
+  });
+
+  final List<CNTabBarItem> items;
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+  final Color? tint;
+  final Color? backgroundColor;
+  final double? iconSize;
+  final double? height;
+
+  @override
+  State<CNTabBar> createState() => _CNTabBarState();
+}
+
+class _CNTabBarState extends State<CNTabBar> {
+  MethodChannel? _channel;
+  int? _lastIndex;
+  int? _lastTint;
+  int? _lastBg;
+  double? _intrinsicHeight;
+
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+
+  @override
+  void didUpdateWidget(covariant CNTabBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncPropsToNativeIfNeeded();
+  }
+
+  @override
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS)) {
+      // Simple Flutter fallback using CupertinoTabBar for non-Apple platforms.
+      return SizedBox(
+        height: widget.height,
+        child: CupertinoTabBar(
+          items: [
+            for (final item in widget.items)
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.circle),
+                label: item.label,
+              ),
+          ],
+          currentIndex: widget.currentIndex,
+          onTap: widget.onTap,
+          backgroundColor: widget.backgroundColor,
+          inactiveColor: CupertinoColors.inactiveGray,
+          activeColor: widget.tint ?? CupertinoTheme.of(context).primaryColor,
+        ),
+      );
+    }
+
+    final labels = widget.items.map((e) => e.label).toList();
+    final symbols = widget.items.map((e) => e.icon?.name).toList();
+    final sizes = widget.items.map((e) => (widget.iconSize ?? e.icon?.size)).toList();
+    final colors = widget.items
+        .map((e) => resolveColorToArgb(e.icon?.color, context))
+        .toList();
+
+    final creationParams = <String, dynamic>{
+      'labels': labels,
+      'sfSymbols': symbols,
+      'sfSymbolSizes': sizes,
+      'sfSymbolColors': colors,
+      'selectedIndex': widget.currentIndex,
+      'isDark': _isDark,
+      'style': encodeStyle(context, tint: widget.tint)
+        ..addAll({
+          if (widget.backgroundColor != null)
+            'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
+        }),
+    };
+
+    final viewType = 'CupertinoNativeTabBar';
+    final platformView = defaultTargetPlatform == TargetPlatform.iOS
+        ? UiKitView(
+            viewType: viewType,
+            creationParams: creationParams,
+            creationParamsCodec: const StandardMessageCodec(),
+            onPlatformViewCreated: _onCreated,
+          )
+        : AppKitView(
+            viewType: viewType,
+            creationParams: creationParams,
+            creationParamsCodec: const StandardMessageCodec(),
+            onPlatformViewCreated: _onCreated,
+          );
+
+    final h = widget.height ?? _intrinsicHeight ?? 50.0;
+    return SizedBox(height: h, child: platformView);
+  }
+
+  void _onCreated(int id) {
+    final ch = MethodChannel('CupertinoNativeTabBar_$id');
+    _channel = ch;
+    ch.setMethodCallHandler(_onMethodCall);
+    _lastIndex = widget.currentIndex;
+    _lastTint = resolveColorToArgb(widget.tint, context);
+    _lastBg = resolveColorToArgb(widget.backgroundColor, context);
+    _requestIntrinsicSize();
+  }
+
+  Future<dynamic> _onMethodCall(MethodCall call) async {
+    if (call.method == 'valueChanged') {
+      final args = call.arguments as Map?;
+      final idx = (args?['index'] as num?)?.toInt();
+      if (idx != null && idx != _lastIndex) {
+        widget.onTap(idx);
+        _lastIndex = idx;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _syncPropsToNativeIfNeeded() async {
+    final ch = _channel;
+    if (ch == null) return;
+    final idx = widget.currentIndex;
+    final tint = resolveColorToArgb(widget.tint, context);
+    final bg = resolveColorToArgb(widget.backgroundColor, context);
+    if (_lastIndex != idx) {
+      await ch.invokeMethod('setSelectedIndex', {'index': idx});
+      _lastIndex = idx;
+    }
+
+    final style = <String, dynamic>{};
+    if (_lastTint != tint && tint != null) {
+      style['tint'] = tint;
+      _lastTint = tint;
+    }
+    if (_lastBg != bg && bg != null) {
+      style['backgroundColor'] = bg;
+      _lastBg = bg;
+    }
+    if (style.isNotEmpty) {
+      await ch.invokeMethod('setStyle', style);
+    }
+  }
+
+  Future<void> _requestIntrinsicSize() async {
+    if (widget.height != null) return;
+    final ch = _channel;
+    if (ch == null) return;
+    try {
+      final size = await ch.invokeMethod<Map>('getIntrinsicSize');
+      final h = (size?['height'] as num?)?.toDouble();
+      if (!mounted) return;
+      if (h != null && h > 0 && _intrinsicHeight != h) {
+        setState(() => _intrinsicHeight = h);
+      }
+    } catch (_) {}
+  }
+}

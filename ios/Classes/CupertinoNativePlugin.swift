@@ -20,6 +20,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let iconFactory = CupertinoIconViewFactory(messenger: registrar.messenger())
     registrar.register(iconFactory, withId: "CupertinoNativeIcon")
+
+    let tabBarFactory = CupertinoTabBarViewFactory(messenger: registrar.messenger())
+    registrar.register(tabBarFactory, withId: "CupertinoNativeTabBar")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
