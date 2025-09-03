@@ -22,7 +22,6 @@ class CupertinoSegmentedControlNSView: NSView {
     var selectedIndex: Int = -1
     var enabled: Bool = true
     var isDark: Bool = false
-    var tint: NSColor? = nil
 
     if let dict = args as? [String: Any] {
       if let arr = dict["labels"] as? [String] { labels = arr }
@@ -34,7 +33,6 @@ class CupertinoSegmentedControlNSView: NSView {
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
       if let style = dict["style"] as? [String: Any] {
-        if let n = style["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
         if let s = style["iconSize"] as? NSNumber { self.defaultIconSize = CGFloat(truncating: s) }
         if let mode = style["iconRenderingMode"] as? String { self.defaultIconRenderingMode = mode }
         if let g = style["iconGradientEnabled"] as? NSNumber { self.defaultIconGradientEnabled = g.boolValue }
@@ -52,7 +50,6 @@ class CupertinoSegmentedControlNSView: NSView {
     configureSegments()
     if selectedIndex >= 0 { control.selectedSegment = selectedIndex }
     control.isEnabled = enabled
-    if #available(macOS 10.15, *), let c = tint { control.contentTintColor = c }
 
     control.target = self
     control.action = #selector(onChanged(_:))
@@ -84,9 +81,6 @@ class CupertinoSegmentedControlNSView: NSView {
         } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
       case "setStyle":
         if let args = call.arguments as? [String: Any] {
-          if #available(macOS 10.15, *), let n = args["tint"] as? NSNumber {
-            self.control.contentTintColor = Self.colorFromARGB(n.intValue)
-          }
           if let s = args["iconSize"] as? NSNumber { self.defaultIconSize = CGFloat(truncating: s) }
           self.configureSegments()
           result(nil)
@@ -110,7 +104,8 @@ class CupertinoSegmentedControlNSView: NSView {
     for i in 0..<count {
       if i < symbols.count, #available(macOS 11.0, *), var image = NSImage(systemSymbolName: symbols[i], accessibilityDescription: nil) {
         if let size = (i < perSymbolSizes.count ? perSymbolSizes[i] : nil) ?? defaultIconSize {
-          if let cfg = NSImage.SymbolConfiguration(pointSize: size) {
+          if #available(macOS 12.0, *) {
+            let cfg = NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
             image = image.withSymbolConfiguration(cfg) ?? image
           }
         }
@@ -119,19 +114,18 @@ class CupertinoSegmentedControlNSView: NSView {
         if let mode = mode {
           switch mode {
           case "hierarchical":
-            if #available(macOS 12.0, *), let color = control.contentTintColor { // global only
-              if let cfg = NSImage.SymbolConfiguration(hierarchicalColor: color) {
-                image = image.withSymbolConfiguration(cfg) ?? image
-              }
+            // Best-effort: requires a color; use no-op if none provided globally
+            if #available(macOS 12.0, *) {
+              // No per-icon color; rely on defaults
+              // If needed, this can consult a global default icon color in future
             }
           case "palette":
             // macOS lacks easy per-icon palette with NSImage API; rely on contentTintColor
             break
           case "multicolor":
             if #available(macOS 12.0, *) {
-              if let cfg = NSImage.SymbolConfiguration.preferringMulticolor() {
-                image = image.withSymbolConfiguration(cfg) ?? image
-              }
+              let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
+              image = image.withSymbolConfiguration(cfg) ?? image
             }
           default:
             break
