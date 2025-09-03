@@ -15,6 +15,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let segmentedFactory = CupertinoSegmentedControlViewFactory(messenger: registrar.messenger)
     registrar.register(segmentedFactory, withId: "CupertinoNativeSegmentedControl")
+
+    let iconFactory = CupertinoIconViewFactory(messenger: registrar.messenger)
+    registrar.register(iconFactory, withId: "CupertinoNativeIcon")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
