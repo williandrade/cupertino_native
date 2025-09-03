@@ -10,6 +10,7 @@ class CupertinoSegmentedControlNSView: NSView {
     self.control = NSSegmentedControl(labels: [], trackingMode: .selectOne, target: nil, action: nil)
 
     var labels: [String] = []
+    var sfSymbols: [String] = []
     var selectedIndex: Int = -1
     var enabled: Bool = true
     var isDark: Bool = false
@@ -17,6 +18,7 @@ class CupertinoSegmentedControlNSView: NSView {
 
     if let dict = args as? [String: Any] {
       if let arr = dict["labels"] as? [String] { labels = arr }
+      if let arr = dict["sfSymbols"] as? [String] { sfSymbols = arr }
       if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
@@ -31,7 +33,7 @@ class CupertinoSegmentedControlNSView: NSView {
     layer?.backgroundColor = NSColor.clear.cgColor
     appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
 
-    configureSegments(labels: labels)
+    configureSegments(labels: labels, sfSymbols: sfSymbols)
     if selectedIndex >= 0 { control.selectedSegment = selectedIndex }
     control.isEnabled = enabled
     if #available(macOS 10.15, *), let c = tint { control.contentTintColor = c }
@@ -84,10 +86,17 @@ class CupertinoSegmentedControlNSView: NSView {
 
   required init?(coder: NSCoder) { return nil }
 
-  private func configureSegments(labels: [String]) {
-    control.segmentCount = labels.count
-    for (i, label) in labels.enumerated() {
-      control.setLabel(label, forSegment: i)
+  private func configureSegments(labels: [String], sfSymbols: [String]) {
+    let count = max(labels.count, sfSymbols.count)
+    control.segmentCount = count
+    for i in 0..<count {
+      if i < sfSymbols.count, #available(macOS 11.0, *), let image = NSImage(systemSymbolName: sfSymbols[i], accessibilityDescription: nil) {
+        control.setImage(image, forSegment: i)
+      } else if i < labels.count {
+        control.setLabel(labels[i], forSegment: i)
+      } else {
+        control.setLabel("", forSegment: i)
+      }
     }
   }
 

@@ -12,6 +12,7 @@ class CupertinoSegmentedControlPlatformView: NSObject, FlutterPlatformView {
     self.control = UISegmentedControl(items: [])
 
     var labels: [String] = []
+    var sfSymbols: [String] = []
     var selectedIndex: Int = UISegmentedControl.noSegment
     var enabled: Bool = true
     var isDark: Bool = false
@@ -19,6 +20,7 @@ class CupertinoSegmentedControlPlatformView: NSObject, FlutterPlatformView {
 
     if let dict = args as? [String: Any] {
       if let arr = dict["labels"] as? [String] { labels = arr }
+      if let arr = dict["sfSymbols"] as? [String] { sfSymbols = arr }
       if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
@@ -35,8 +37,15 @@ class CupertinoSegmentedControlPlatformView: NSObject, FlutterPlatformView {
     }
 
     control.removeAllSegments()
-    for (idx, label) in labels.enumerated() {
-      control.insertSegment(withTitle: label, at: idx, animated: false)
+    let count = max(labels.count, sfSymbols.count)
+    for idx in 0..<count {
+      if idx < sfSymbols.count, let image = UIImage(systemName: sfSymbols[idx]) {
+        control.insertSegment(with: image, at: idx, animated: false)
+      } else if idx < labels.count {
+        control.insertSegment(withTitle: labels[idx], at: idx, animated: false)
+      } else {
+        control.insertSegment(withTitle: "", at: idx, animated: false)
+      }
     }
     control.selectedSegmentIndex = selectedIndex
     control.isEnabled = enabled

@@ -12,6 +12,7 @@ class SegmentedControlDemoPage extends StatefulWidget {
 class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
   int _index1 = 0;
   int _index2 = 1;
+  int _index3 = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +45,22 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               ),
             ),
             Text('Selected: ${_index2 + 1}'),
+            const SizedBox(height: 24),
+            const Text('SF Symbols (heart.fill / star.fill / bell.fill)'),
+            Center(
+              child: CNSegmentedControl(
+                labels: const [],
+                sfSymbols: const [
+                  CNSFSymbol('heart.fill'),
+                  CNSFSymbol('star.fill'),
+                  CNSFSymbol('bell.fill'),
+                ],
+                selectedIndex: _index3,
+                shrinkWrap: true,
+                onValueChanged: (i) => setState(() => _index3 = i),
+              ),
+            ),
+            Text('Selected: ${_index3 + 1}'),
           ],
         ),
       ),

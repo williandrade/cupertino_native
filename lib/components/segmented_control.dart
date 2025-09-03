@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import '../channel/params.dart';
+import '../style/sf_symbol.dart';
 
 class CNSegmentedControl extends StatefulWidget {
   const CNSegmentedControl({
@@ -14,6 +15,7 @@ class CNSegmentedControl extends StatefulWidget {
     this.tint,
     this.height = 32.0,
     this.shrinkWrap = false,
+    this.sfSymbols,
   });
 
   final List<String> labels;
@@ -23,6 +25,7 @@ class CNSegmentedControl extends StatefulWidget {
   final Color? tint;
   final double height;
   final bool shrinkWrap;
+  final List<CNSFSymbol>? sfSymbols;
 
   @override
   State<CNSegmentedControl> createState() => _CNSegmentedControlState();
@@ -80,6 +83,8 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
       'enabled': widget.enabled,
       'isDark': _isDark,
       'style': encodeStyle(context, tint: widget.tint),
+      if (widget.sfSymbols != null)
+        'sfSymbols': widget.sfSymbols!.map((e) => e.name).toList(),
     };
 
     Widget platformView;
