@@ -63,6 +63,8 @@ class _CNButtonState extends State<CNButton> {
   int? _lastIconColor;
   double? _intrinsicWidth;
   CNButtonStyle? _lastStyle;
+  Offset? _downPosition;
+  bool _pressed = false;
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
@@ -151,9 +153,27 @@ class _CNButtonState extends State<CNButton> {
           width = _intrinsicWidth ?? 80.0;
         }
         return Listener(
-          onPointerDown: (_) => _setPressed(true),
-          onPointerUp: (_) => _setPressed(false),
-          onPointerCancel: (_) => _setPressed(false),
+          onPointerDown: (e) {
+            _downPosition = e.position;
+            _setPressed(true);
+          },
+          onPointerMove: (e) {
+            final start = _downPosition;
+            if (start != null && _pressed) {
+              final moved = (e.position - start).distance;
+              if (moved > kTouchSlop) {
+                _setPressed(false);
+              }
+            }
+          },
+          onPointerUp: (_) {
+            _setPressed(false);
+            _downPosition = null;
+          },
+          onPointerCancel: (_) {
+            _setPressed(false);
+            _downPosition = null;
+          },
           child: SizedBox(height: widget.height, width: width, child: platformView),
         );
       },
@@ -263,6 +283,8 @@ class _CNButtonState extends State<CNButton> {
   Future<void> _setPressed(bool pressed) async {
     final ch = _channel;
     if (ch == null) return;
+    if (_pressed == pressed) return;
+    _pressed = pressed;
     try {
       await ch.invokeMethod('setPressed', {'pressed': pressed});
     } catch (_) {}
