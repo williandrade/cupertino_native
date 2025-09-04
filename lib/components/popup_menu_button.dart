@@ -24,6 +24,20 @@ class CNPopupMenuDivider extends CNPopupMenuEntry {
   const CNPopupMenuDivider();
 }
 
+// Reusable style enum for buttons across widgets (popup menu, future CNButton, ...)
+enum CNButtonStyle {
+  automatic,
+  accessoryBar,
+  accessoryBarAction,
+  bordered,
+  borderedProminent,
+  borderless,
+  glass,
+  card,
+  link,
+  plain,
+}
+
 class CNPopupMenuButton extends StatefulWidget {
   const CNPopupMenuButton({
     super.key,
@@ -33,14 +47,39 @@ class CNPopupMenuButton extends StatefulWidget {
     this.tint,
     this.height = 32.0,
     this.shrinkWrap = false,
-  });
+    this.buttonStyle = CNButtonStyle.automatic,
+  })  : buttonIcon = null,
+        size = null,
+        round = false;
 
-  final String buttonLabel;
+  const CNPopupMenuButton.icon({
+    super.key,
+    required this.buttonIcon,
+    required this.items,
+    required this.onSelected,
+    this.tint,
+    this.round = true,
+    double iconSize = 32.0,
+    this.buttonStyle = CNButtonStyle.automatic,
+  })  : buttonLabel = null,
+        size = iconSize,
+        height = iconSize,
+        shrinkWrap = false,
+        super();
+
+  final String? buttonLabel; // null in icon mode
+  final CNSymbol? buttonIcon; // non-null in icon mode
+  // Fixed size (width = height) when in icon mode.
+  final double? size;
+  final bool round; // only used for icon mode
   final List<CNPopupMenuEntry> items;
   final ValueChanged<int> onSelected;
   final Color? tint;
   final double height;
   final bool shrinkWrap;
+  final CNButtonStyle buttonStyle;
+
+  bool get isIconButton => buttonIcon != null;
 
   @override
   State<CNPopupMenuButton> createState() => _CNPopupMenuButtonState();
@@ -51,20 +90,24 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
   bool? _lastIsDark;
   int? _lastTint;
   String? _lastTitle;
+  String? _lastIconName;
+  double? _lastIconSize;
+  int? _lastIconColor;
   double? _intrinsicWidth;
+  CNButtonStyle? _lastStyle;
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
-  }
 
   @override
   void didUpdateWidget(covariant CNPopupMenuButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncPropsToNativeIfNeeded();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -77,16 +120,20 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
   Widget build(BuildContext context) {
     if (!(defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.macOS)) {
+      // Fallback Flutter implementation
       return SizedBox(
         height: widget.height,
+        width: widget.isIconButton && widget.round ? (widget.size ?? widget.height) : null,
         child: CupertinoButton(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: widget.isIconButton
+              ? const EdgeInsets.all(4)
+              : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           onPressed: () async {
             final selected = await showCupertinoModalPopup<int>(
               context: context,
               builder: (ctx) {
                 return CupertinoActionSheet(
-                  title: Text(widget.buttonLabel),
+                  title: widget.buttonLabel != null ? Text(widget.buttonLabel!) : null,
                   actions: [
                     for (var i = 0; i < widget.items.length; i++)
                       if (widget.items[i] is CNPopupMenuItem)
@@ -107,7 +154,12 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
             );
             if (selected != null) widget.onSelected(selected);
           },
-          child: Text(widget.buttonLabel),
+          child: widget.isIconButton
+              ? Icon(
+                  CupertinoIcons.ellipsis,
+                  size: widget.buttonIcon?.size ?? ((widget.size ?? widget.height) * 0.6),
+                )
+              : Text(widget.buttonLabel ?? ''),
         ),
       );
     }
@@ -140,7 +192,13 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
     }
 
     final creationParams = <String, dynamic>{
-      'buttonTitle': widget.buttonLabel,
+      if (widget.buttonLabel != null) 'buttonTitle': widget.buttonLabel,
+      if (widget.buttonIcon != null) 'buttonIconName': widget.buttonIcon!.name,
+      if (widget.buttonIcon?.size != null) 'buttonIconSize': widget.buttonIcon!.size,
+      if (widget.buttonIcon?.color != null)
+        'buttonIconColor': resolveColorToArgb(widget.buttonIcon!.color, context),
+      if (widget.isIconButton) 'round': widget.round,
+      'buttonStyle': widget.buttonStyle.name,
       'labels': labels,
       'sfSymbols': symbols,
       'isDivider': isDivider,
@@ -170,7 +228,13 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
         final hasBoundedWidth = constraints.hasBoundedWidth;
         // If shrinkWrap or width is unbounded (e.g. inside a Row), prefer intrinsic width.
         final preferIntrinsic = widget.shrinkWrap || !hasBoundedWidth;
-        final width = preferIntrinsic ? (_intrinsicWidth ?? 80.0) : null;
+        double? width;
+        if (widget.isIconButton) {
+          // Fixed circle size for icon buttons
+          width = widget.size ?? widget.height;
+        } else if (preferIntrinsic) {
+          width = _intrinsicWidth ?? 80.0;
+        }
         return SizedBox(height: widget.height, width: width, child: platformView);
       },
     );
@@ -183,7 +247,13 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
     _lastTint = resolveColorToArgb(widget.tint, context);
     _lastIsDark = _isDark;
     _lastTitle = widget.buttonLabel;
-    _requestIntrinsicSize();
+    _lastIconName = widget.buttonIcon?.name;
+    _lastIconSize = widget.buttonIcon?.size;
+    _lastIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
+    _lastStyle = widget.buttonStyle;
+    if (!widget.isIconButton) {
+      _requestIntrinsicSize();
+    }
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -210,15 +280,39 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
   Future<void> _syncPropsToNativeIfNeeded() async {
     final ch = _channel;
     if (ch == null) return;
+    // Capture context-dependent values before any awaits
     final tint = resolveColorToArgb(widget.tint, context);
+    final preIconName = widget.buttonIcon?.name;
+    final preIconSize = widget.buttonIcon?.size;
+    final preIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
+    final preRound = widget.round;
     if (_lastTint != tint && tint != null) {
       await ch.invokeMethod('setStyle', {'tint': tint});
       _lastTint = tint;
     }
-    if (_lastTitle != widget.buttonLabel) {
+    if (_lastStyle != widget.buttonStyle) {
+      await ch.invokeMethod('setStyle', {'buttonStyle': widget.buttonStyle.name});
+      _lastStyle = widget.buttonStyle;
+    }
+    if (_lastTitle != widget.buttonLabel && widget.buttonLabel != null) {
       await ch.invokeMethod('setButtonTitle', {'title': widget.buttonLabel});
       _lastTitle = widget.buttonLabel;
       _requestIntrinsicSize();
+    }
+
+    if (widget.isIconButton) {
+      final iconName = preIconName;
+      final iconSize = preIconSize;
+      final iconColor = preIconColor;
+      final round = preRound;
+      final updates = <String, dynamic>{};
+      if (_lastIconName != iconName && iconName != null) { updates['buttonIconName'] = iconName; _lastIconName = iconName; }
+      if (_lastIconSize != iconSize && iconSize != null) { updates['buttonIconSize'] = iconSize; _lastIconSize = iconSize; }
+      if (_lastIconColor != iconColor && iconColor != null) { updates['buttonIconColor'] = iconColor; _lastIconColor = iconColor; }
+      updates['round'] = round;
+      if (updates.isNotEmpty) {
+        await ch.invokeMethod('setButtonIcon', updates);
+      }
     }
 
     // Update items (labels/icons/dividers)

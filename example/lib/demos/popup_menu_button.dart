@@ -5,7 +5,8 @@ class PopupMenuButtonDemoPage extends StatefulWidget {
   const PopupMenuButtonDemoPage({super.key});
 
   @override
-  State<PopupMenuButtonDemoPage> createState() => _PopupMenuButtonDemoPageState();
+  State<PopupMenuButtonDemoPage> createState() =>
+      _PopupMenuButtonDemoPageState();
 }
 
 class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
@@ -15,14 +16,26 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
   Widget build(BuildContext context) {
     final items = <CNPopupMenuEntry>[
       CNPopupMenuItem(label: 'New File', icon: const CNSymbol('doc', size: 18)),
-      CNPopupMenuItem(label: 'New Folder', icon: const CNSymbol('folder', size: 18)),
+      CNPopupMenuItem(
+        label: 'New Folder',
+        icon: const CNSymbol('folder', size: 18),
+      ),
       const CNPopupMenuDivider(),
-      CNPopupMenuItem(label: 'Rename', icon: const CNSymbol('rectangle.and.pencil.and.ellipsis', size: 18)),
-      CNPopupMenuItem(label: 'Delete', icon: const CNSymbol('trash', size: 18), enabled: true),
+      CNPopupMenuItem(
+        label: 'Rename',
+        icon: const CNSymbol('rectangle.and.pencil.and.ellipsis', size: 18),
+      ),
+      CNPopupMenuItem(
+        label: 'Delete',
+        icon: const CNSymbol('trash', size: 18),
+        enabled: true,
+      ),
     ];
 
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Popup Menu Button')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Popup Menu Button'),
+      ),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -37,6 +50,22 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
                   onSelected: (index) {
                     setState(() => _lastSelected = index);
                   },
+                  buttonStyle: CNButtonStyle.automatic,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CNPopupMenuButton.icon(
+                  buttonIcon: const CNSymbol('ellipsis', size: 18),
+                  items: items,
+                  iconSize: 32,
+                  onSelected: (index) {
+                    setState(() => _lastSelected = index);
+                  },
+                  buttonStyle: CNButtonStyle.glass,
                 ),
               ],
             ),
@@ -51,4 +80,3 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
     );
   }
 }
-

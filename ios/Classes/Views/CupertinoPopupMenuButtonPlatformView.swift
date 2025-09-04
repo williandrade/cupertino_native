@@ -5,6 +5,7 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
   private let channel: FlutterMethodChannel
   private let container: UIView
   private let button: UIButton
+  private var isRoundButton: Bool = false
   private var labels: [String] = []
   private var symbols: [String] = []
   private var dividers: [Bool] = []
@@ -15,9 +16,14 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
     self.container = UIView(frame: frame)
     self.button = UIButton(type: .system)
 
-    var title: String = "Menu"
+    var title: String? = nil
+    var iconName: String? = nil
+    var iconSize: CGFloat? = nil
+    var iconColor: UIColor? = nil
+    var makeRound: Bool = false
     var isDark: Bool = false
     var tint: UIColor? = nil
+    var buttonStyle: String = "automatic"
     var labels: [String] = []
     var symbols: [String] = []
     var dividers: [NSNumber] = []
@@ -27,8 +33,13 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
 
     if let dict = args as? [String: Any] {
       if let t = dict["buttonTitle"] as? String { title = t }
+      if let s = dict["buttonIconName"] as? String { iconName = s }
+      if let s = dict["buttonIconSize"] as? NSNumber { iconSize = CGFloat(truncating: s) }
+      if let c = dict["buttonIconColor"] as? NSNumber { iconColor = Self.colorFromARGB(c.intValue) }
+      if let r = dict["round"] as? NSNumber { makeRound = r.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
       if let style = dict["style"] as? [String: Any], let n = style["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
+      if let bs = dict["buttonStyle"] as? String { buttonStyle = bs }
       labels = (dict["labels"] as? [String]) ?? []
       symbols = (dict["sfSymbols"] as? [String]) ?? []
       dividers = (dict["isDivider"] as? [NSNumber]) ?? []
@@ -43,8 +54,11 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
     if #available(iOS 13.0, *) { container.overrideUserInterfaceStyle = isDark ? .dark : .light }
 
     button.translatesAutoresizingMaskIntoConstraints = false
-    button.setTitle(title, for: .normal)
+    // Choose a visible default tint if none provided
     if let t = tint { button.tintColor = t }
+    else if #available(iOS 13.0, *) { button.tintColor = .label }
+
+    // Add button and pin to container
     container.addSubview(button)
     NSLayoutConstraint.activate([
       button.leadingAnchor.constraint(equalTo: container.leadingAnchor),
@@ -58,6 +72,17 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
     self.symbols = symbols
     self.dividers = dividers.map { $0.boolValue }
     self.enabled = enabled.map { $0.boolValue }
+
+    self.isRoundButton = makeRound
+    applyButtonStyle(buttonStyle: buttonStyle, round: makeRound)
+    // Now set content (title/image) using configuration when available
+    var finalImage: UIImage? = nil
+    if let name = iconName, var image = UIImage(systemName: name) {
+      if let sz = iconSize { image = image.applyingSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: sz)) ?? image }
+      if let col = iconColor, #available(iOS 13.0, *) { image = image.withTintColor(col, renderingMode: .alwaysOriginal) }
+      finalImage = image
+    }
+    setButtonContent(title: title, image: finalImage, iconOnly: (title == nil))
 
     rebuildMenu(defaultSizes: sizes, defaultColors: colors)
     if #available(iOS 14.0, *) {
@@ -84,8 +109,24 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
       case "setStyle":
         if let args = call.arguments as? [String: Any] {
           if let n = args["tint"] as? NSNumber { self.button.tintColor = Self.colorFromARGB(n.intValue) }
+          if let bs = args["buttonStyle"] as? String { self.applyButtonStyle(buttonStyle: bs, round: self.isRoundButton) }
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
+      case "setButtonIcon":
+        if let args = call.arguments as? [String: Any] {
+          var finalImage: UIImage? = nil
+          if let name = args["buttonIconName"] as? String, var image = UIImage(systemName: name) {
+            if let sz = args["buttonIconSize"] as? NSNumber { image = image.applyingSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: CGFloat(truncating: sz))) ?? image }
+            if let c = args["buttonIconColor"] as? NSNumber, #available(iOS 13.0, *) {
+              image = image.withTintColor(Self.colorFromARGB(c.intValue), renderingMode: .alwaysOriginal)
+            }
+            finalImage = image
+          }
+          if let r = args["round"] as? NSNumber { self.isRoundButton = r.boolValue }
+          self.applyButtonStyle(buttonStyle: "tinted", round: self.isRoundButton)
+          self.setButtonContent(title: nil, image: finalImage, iconOnly: true)
+          result(nil)
+        } else { result(FlutterError(code: "bad_args", message: "Missing icon args", details: nil)) }
       case "setBrightness":
         if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
           if #available(iOS 13.0, *) { self.container.overrideUserInterfaceStyle = isDark ? .dark : .light }
@@ -191,5 +232,59 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
     let g = CGFloat((argb >> 8) & 0xFF) / 255.0
     let b = CGFloat(argb & 0xFF) / 255.0
     return UIColor(red: r, green: g, blue: b, alpha: a)
+  }
+
+  private func applyButtonStyle(buttonStyle: String, round: Bool) {
+    if #available(iOS 15.0, *) {
+      var config: UIButton.Configuration
+      switch buttonStyle {
+      case "automatic": config = .plain()
+      case "accessoryBar": config = .gray()
+      case "accessoryBarAction": config = .tinted()
+      case "bordered": config = .bordered()
+      case "borderedProminent": config = .borderedProminent()
+      case "glass":
+        config = .plain()
+        var bg = UIBackgroundConfiguration.clear()
+        bg.visualEffect = UIBlurEffect(style: .systemChromeMaterial)
+        bg.cornerRadius = round ? 999 : 12
+        bg.strokeColor = UIColor.separator.withAlphaComponent(0.45)
+        bg.strokeWidth = 1.0 / UIScreen.main.scale
+        config.background = bg
+      case "borderless": config = .plain()
+      case "card": config = .plain()
+      case "link": config = .plain()
+      case "plain": config = .plain()
+      default: config = .plain()
+      }
+      config.cornerStyle = round ? .capsule : .dynamic
+      button.configuration = config
+    } else {
+      button.layer.cornerRadius = round ? 999 : 8
+      button.clipsToBounds = true
+      if buttonStyle == "glass" {
+        button.backgroundColor = UIColor(white: 1.0, alpha: 0.22)
+        button.layer.borderColor = UIColor.separator.withAlphaComponent(0.45).cgColor
+        button.layer.borderWidth = 1.0 / UIScreen.main.scale
+      } else {
+        button.backgroundColor = .clear
+        button.layer.borderWidth = 0
+      }
+    }
+  }
+
+  private func setButtonContent(title: String?, image: UIImage?, iconOnly: Bool) {
+    if #available(iOS 15.0, *) {
+      var cfg = button.configuration ?? .plain()
+      cfg.title = title
+      cfg.image = image
+      button.configuration = cfg
+    } else {
+      button.setTitle(title, for: .normal)
+      button.setImage(image, for: .normal)
+      if iconOnly {
+        button.contentEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
+      }
+    }
   }
 }
