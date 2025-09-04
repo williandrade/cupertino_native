@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 
 import '../channel/params.dart';
 import '../style/sf_symbol.dart';
+import '../style/button_style.dart';
 
 abstract class CNPopupMenuEntry {
   const CNPopupMenuEntry();
@@ -21,18 +23,6 @@ class CNPopupMenuDivider extends CNPopupMenuEntry {
 }
 
 // Reusable style enum for buttons across widgets (popup menu, future CNButton, ...)
-enum CNButtonStyle {
-  automatic,
-  accessoryBar,
-  accessoryBarAction,
-  bordered,
-  borderedProminent,
-  borderless,
-  glass,
-  card,
-  link,
-  plain,
-}
 
 class CNPopupMenuButton extends StatefulWidget {
   const CNPopupMenuButton({
@@ -218,12 +208,18 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
             creationParams: creationParams,
             creationParamsCodec: const StandardMessageCodec(),
             onPlatformViewCreated: _onCreated,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+            },
           )
         : AppKitView(
             viewType: viewType,
             creationParams: creationParams,
             creationParamsCodec: const StandardMessageCodec(),
             onPlatformViewCreated: _onCreated,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+            },
           );
 
     return LayoutBuilder(

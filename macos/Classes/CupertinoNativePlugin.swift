@@ -24,6 +24,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let popupMenuFactory = CupertinoPopupMenuButtonViewFactory(messenger: registrar.messenger)
     registrar.register(popupMenuFactory, withId: "CupertinoNativePopupMenuButton")
+
+    let buttonFactory = CupertinoButtonViewFactory(messenger: registrar.messenger)
+    registrar.register(buttonFactory, withId: "CupertinoNativeButton")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

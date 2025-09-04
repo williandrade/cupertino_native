@@ -5,6 +5,7 @@ import 'demos/segmented_control.dart';
 import 'demos/tab_bar.dart';
 import 'demos/icon.dart';
 import 'demos/popup_menu_button.dart';
+import 'demos/button.dart';
 
 void main() {
   runApp(const MyApp());
@@ -123,7 +124,17 @@ class HomePage extends StatelessWidget {
                     );
                   },
                 ),
-                // Button demo removed
+                CupertinoListTile(
+                  title: Text('Button'),
+                  trailing: CupertinoListTileChevron(),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (_) => const ButtonDemoPage(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             CupertinoListSection.insetGrouped(

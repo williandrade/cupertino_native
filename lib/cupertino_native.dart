@@ -7,7 +7,8 @@ export 'components/icon.dart';
 export 'components/tab_bar.dart';
 export 'components/popup_menu_button.dart';
 export 'style/sf_symbol.dart';
-// export 'components/button.dart'; // removed
+export 'style/button_style.dart';
+export 'components/button.dart';
 
 import 'cupertino_native_platform_interface.dart';
 
