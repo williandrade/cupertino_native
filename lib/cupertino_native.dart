@@ -5,6 +5,7 @@ export 'components/switch.dart';
 export 'components/segmented_control.dart';
 export 'components/icon.dart';
 export 'components/tab_bar.dart';
+export 'components/popup_menu_button.dart';
 export 'style/sf_symbol.dart';
 // export 'components/button.dart'; // removed
 

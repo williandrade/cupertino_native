@@ -23,6 +23,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let tabBarFactory = CupertinoTabBarViewFactory(messenger: registrar.messenger())
     registrar.register(tabBarFactory, withId: "CupertinoNativeTabBar")
+
+    let popupMenuFactory = CupertinoPopupMenuButtonViewFactory(messenger: registrar.messenger())
+    registrar.register(popupMenuFactory, withId: "CupertinoNativePopupMenuButton")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
