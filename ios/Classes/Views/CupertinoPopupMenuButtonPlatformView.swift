@@ -122,8 +122,7 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
             }
             finalImage = image
           }
-          if let r = args["round"] as? NSNumber { self.isRoundButton = r.boolValue }
-          self.applyButtonStyle(buttonStyle: "tinted", round: self.isRoundButton)
+          // Do not change style on icon updates; just update content.
           self.setButtonContent(title: nil, image: finalImage, iconOnly: true)
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing icon args", details: nil)) }

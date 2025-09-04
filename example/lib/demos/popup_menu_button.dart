@@ -60,8 +60,8 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
               children: [
                 CNPopupMenuButton.icon(
                   buttonIcon: const CNSymbol('ellipsis', size: 18),
+                  size: 44,
                   items: items,
-                  iconSize: 32,
                   onSelected: (index) {
                     setState(() => _lastSelected = index);
                   },
