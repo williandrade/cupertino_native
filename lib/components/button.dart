@@ -114,6 +114,14 @@ class _CNButtonState extends State<CNButton> {
       if (widget.icon?.size != null) 'buttonIconSize': widget.icon!.size,
       if (widget.icon?.color != null)
         'buttonIconColor': resolveColorToArgb(widget.icon!.color, context),
+      if (widget.icon?.mode != null)
+        'buttonIconRenderingMode': widget.icon!.mode!.name,
+      if (widget.icon?.paletteColors != null)
+        'buttonIconPaletteColors': widget.icon!.paletteColors!
+            .map((c) => resolveColorToArgb(c, context))
+            .toList(),
+      if (widget.icon?.gradient != null)
+        'buttonIconGradientEnabled': widget.icon!.gradient,
       if (widget.isIcon) 'round': true,
       'buttonStyle': widget.style.name,
       'enabled': (widget.enabled && widget.onPressed != null),
@@ -263,6 +271,17 @@ class _CNButtonState extends State<CNButton> {
       if (_lastIconColor != iconColor && iconColor != null) {
         updates['buttonIconColor'] = iconColor;
         _lastIconColor = iconColor;
+      }
+      if (widget.icon?.mode != null) {
+        updates['buttonIconRenderingMode'] = widget.icon!.mode!.name;
+      }
+      if (widget.icon?.paletteColors != null) {
+        updates['buttonIconPaletteColors'] = widget.icon!.paletteColors!
+            .map((c) => resolveColorToArgb(c, context))
+            .toList();
+      }
+      if (widget.icon?.gradient != null) {
+        updates['buttonIconGradientEnabled'] = widget.icon!.gradient;
       }
       if (updates.isNotEmpty) {
         await ch.invokeMethod('setButtonIcon', updates);

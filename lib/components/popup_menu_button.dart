@@ -164,6 +164,9 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
     final enabled = <bool>[];
     final sizes = <double?>[];
     final colors = <int?>[];
+    final modes = <String?>[];
+    final palettes = <List<int?>?>[];
+    final gradients = <bool?>[];
     for (final e in widget.items) {
       if (e is CNPopupMenuDivider) {
         labels.add('');
@@ -172,6 +175,9 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
         enabled.add(false);
         sizes.add(null);
         colors.add(null);
+        modes.add(null);
+        palettes.add(null);
+        gradients.add(null);
       } else if (e is CNPopupMenuItem) {
         labels.add(e.label);
         symbols.add(e.icon?.name ?? '');
@@ -179,6 +185,11 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
         enabled.add(e.enabled);
         sizes.add(e.icon?.size);
         colors.add(resolveColorToArgb(e.icon?.color, context));
+        modes.add(e.icon?.mode?.name);
+        palettes.add(e.icon?.paletteColors
+            ?.map((c) => resolveColorToArgb(c, context))
+            .toList());
+        gradients.add(e.icon?.gradient);
       }
     }
 
@@ -200,8 +211,19 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
       'enabled': enabled,
       'sfSymbolSizes': sizes,
       'sfSymbolColors': colors,
+      'sfSymbolRenderingModes': modes,
+      'sfSymbolPaletteColors': palettes,
+      'sfSymbolGradientEnabled': gradients,
       'isDark': _isDark,
       'style': encodeStyle(context, tint: widget.tint),
+      if (widget.buttonIcon?.mode != null)
+        'buttonIconRenderingMode': widget.buttonIcon!.mode!.name,
+      if (widget.buttonIcon?.paletteColors != null)
+        'buttonIconPaletteColors': widget.buttonIcon!.paletteColors!
+            .map((c) => resolveColorToArgb(c, context))
+            .toList(),
+      if (widget.buttonIcon?.gradient != null)
+        'buttonIconGradientEnabled': widget.buttonIcon!.gradient,
     };
 
     final platformView = defaultTargetPlatform == TargetPlatform.iOS
@@ -308,6 +330,41 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
   Future<void> _syncPropsToNativeIfNeeded() async {
     final ch = _channel;
     if (ch == null) return;
+    // Prepare popup items upfront to avoid using BuildContext after awaits.
+    final updLabels = <String>[];
+    final updSymbols = <String>[];
+    final updIsDivider = <bool>[];
+    final updEnabled = <bool>[];
+    final updSizes = <double?>[];
+    final updColors = <int?>[];
+    final updModes = <String?>[];
+    final updPalettes = <List<int?>?>[];
+    final updGradients = <bool?>[];
+    for (final e in widget.items) {
+      if (e is CNPopupMenuDivider) {
+        updLabels.add('');
+        updSymbols.add('');
+        updIsDivider.add(true);
+        updEnabled.add(false);
+        updSizes.add(null);
+        updColors.add(null);
+        updModes.add(null);
+        updPalettes.add(null);
+        updGradients.add(null);
+      } else if (e is CNPopupMenuItem) {
+        updLabels.add(e.label);
+        updSymbols.add(e.icon?.name ?? '');
+        updIsDivider.add(false);
+        updEnabled.add(e.enabled);
+        updSizes.add(e.icon?.size);
+        updColors.add(resolveColorToArgb(e.icon?.color, context));
+        updModes.add(e.icon?.mode?.name);
+        updPalettes.add(e.icon?.paletteColors
+            ?.map((c) => resolveColorToArgb(c, context))
+            .toList());
+        updGradients.add(e.icon?.gradient);
+      }
+    }
     // Capture context-dependent values before any awaits
     final tint = resolveColorToArgb(widget.tint, context);
     final preIconName = widget.buttonIcon?.name;
@@ -346,34 +403,32 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
         updates['buttonIconColor'] = iconColor;
         _lastIconColor = iconColor;
       }
+      if (widget.buttonIcon?.mode != null) {
+        updates['buttonIconRenderingMode'] = widget.buttonIcon!.mode!.name;
+      }
+      if (widget.buttonIcon?.paletteColors != null) {
+        updates['buttonIconPaletteColors'] = widget.buttonIcon!.paletteColors!
+            .map((c) => resolveColorToArgb(c, context))
+            .toList();
+      }
+      if (widget.buttonIcon?.gradient != null) {
+        updates['buttonIconGradientEnabled'] = widget.buttonIcon!.gradient;
+      }
       if (updates.isNotEmpty) {
         await ch.invokeMethod('setButtonIcon', updates);
       }
     }
 
-    // Update items (labels/icons/dividers)
-    final labels = <String>[];
-    final symbols = <String>[];
-    final isDivider = <bool>[];
-    final enabled = <bool>[];
-    for (final e in widget.items) {
-      if (e is CNPopupMenuDivider) {
-        labels.add('');
-        symbols.add('');
-        isDivider.add(true);
-        enabled.add(false);
-      } else if (e is CNPopupMenuItem) {
-        labels.add(e.label);
-        symbols.add(e.icon?.name ?? '');
-        isDivider.add(false);
-        enabled.add(e.enabled);
-      }
-    }
     await ch.invokeMethod('setItems', {
-      'labels': labels,
-      'sfSymbols': symbols,
-      'isDivider': isDivider,
-      'enabled': enabled,
+      'labels': updLabels,
+      'sfSymbols': updSymbols,
+      'isDivider': updIsDivider,
+      'enabled': updEnabled,
+      'sfSymbolSizes': updSizes,
+      'sfSymbolColors': updColors,
+      'sfSymbolRenderingModes': updModes,
+      'sfSymbolPaletteColors': updPalettes,
+      'sfSymbolGradientEnabled': updGradients,
     });
   }
 

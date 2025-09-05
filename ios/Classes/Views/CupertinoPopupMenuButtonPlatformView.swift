@@ -10,6 +10,17 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
   private var symbols: [String] = []
   private var dividers: [Bool] = []
   private var enabled: [Bool] = []
+  private var itemSizes: [NSNumber] = []
+  private var itemColors: [NSNumber] = []
+  private var itemModes: [String?] = []
+  private var itemPalettes: [[NSNumber]] = []
+  private var itemGradients: [NSNumber?] = []
+  // Track current button icon configuration to keep image across state updates
+  private var btnIconName: String? = nil
+  private var btnIconSize: CGFloat? = nil
+  private var btnIconColor: UIColor? = nil
+  private var btnIconMode: String? = nil
+  private var btnIconPalette: [UIColor] = []
 
   init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
     self.channel = FlutterMethodChannel(name: "CupertinoNativePopupMenuButton_\(viewId)", binaryMessenger: messenger)
@@ -30,6 +41,8 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
     var enabled: [NSNumber] = []
     var sizes: [NSNumber] = []
     var colors: [NSNumber] = []
+    var buttonIconMode: String? = nil
+    var buttonIconPalette: [NSNumber] = []
 
     if let dict = args as? [String: Any] {
       if let t = dict["buttonTitle"] as? String { title = t }
@@ -46,6 +59,11 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
       enabled = (dict["enabled"] as? [NSNumber]) ?? []
       sizes = (dict["sfSymbolSizes"] as? [NSNumber]) ?? []
       colors = (dict["sfSymbolColors"] as? [NSNumber]) ?? []
+      if let modes = dict["sfSymbolRenderingModes"] as? [String?] { self.itemModes = modes }
+      if let palettes = dict["sfSymbolPaletteColors"] as? [[NSNumber]] { self.itemPalettes = palettes }
+      if let gradients = dict["sfSymbolGradientEnabled"] as? [NSNumber?] { self.itemGradients = gradients }
+      if let m = dict["buttonIconRenderingMode"] as? String { buttonIconMode = m }
+      if let pal = dict["buttonIconPaletteColors"] as? [NSNumber] { buttonIconPalette = pal }
     }
 
     super.init()
@@ -76,14 +94,33 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
     self.isRoundButton = makeRound
     applyButtonStyle(buttonStyle: buttonStyle, round: makeRound)
     // Now set content (title/image) using configuration when available
-    var finalImage: UIImage? = nil
-    if let name = iconName, var image = UIImage(systemName: name) {
-      if let sz = iconSize { image = image.applyingSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: sz)) ?? image }
-      if let col = iconColor, #available(iOS 13.0, *) { image = image.withTintColor(col, renderingMode: .alwaysOriginal) }
-      finalImage = image
+    // Cache current icon props for state updates
+    self.btnIconName = iconName
+    self.btnIconSize = iconSize
+    self.btnIconColor = iconColor
+    self.btnIconMode = buttonIconMode
+    if !buttonIconPalette.isEmpty { self.btnIconPalette = buttonIconPalette.map { Self.colorFromARGB($0.intValue) } }
+    // Apply content initially
+    setButtonContent(title: title, image: makeButtonIconImage(), iconOnly: (title == nil))
+    if #available(iOS 15.0, *), var cfg = button.configuration {
+      cfg.preferredSymbolConfigurationForImage = makeButtonSymbolConfiguration()
+      button.configuration = cfg
     }
-    setButtonContent(title: title, image: finalImage, iconOnly: (title == nil))
 
+    // Ensure the image persists across configuration state changes (highlight/menu)
+    if #available(iOS 15.0, *) {
+      button.configurationUpdateHandler = { [weak self] btn in
+        guard let self = self else { return }
+        var cfg = btn.configuration ?? .plain()
+        // Preserve existing title; just re-apply image
+        cfg.image = self.makeButtonIconImage()
+        cfg.preferredSymbolConfigurationForImage = self.makeButtonSymbolConfiguration()
+        btn.configuration = cfg
+      }
+    }
+
+    self.itemSizes = sizes
+    self.itemColors = colors
     rebuildMenu(defaultSizes: sizes, defaultColors: colors)
     if #available(iOS 14.0, *) {
       button.showsMenuAsPrimaryAction = true
@@ -103,7 +140,14 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
           self.symbols = (args["sfSymbols"] as? [String]) ?? []
           self.dividers = ((args["isDivider"] as? [NSNumber]) ?? []).map { $0.boolValue }
           self.enabled = ((args["enabled"] as? [NSNumber]) ?? []).map { $0.boolValue }
-          self.rebuildMenu()
+          let sizes = (args["sfSymbolSizes"] as? [NSNumber]) ?? []
+          let colors = (args["sfSymbolColors"] as? [NSNumber]) ?? []
+          self.itemSizes = sizes
+          self.itemColors = colors
+          self.itemModes = (args["sfSymbolRenderingModes"] as? [String?]) ?? []
+          self.itemPalettes = (args["sfSymbolPaletteColors"] as? [[NSNumber]]) ?? []
+          self.itemGradients = (args["sfSymbolGradientEnabled"] as? [NSNumber?]) ?? []
+          self.rebuildMenu(defaultSizes: sizes, defaultColors: colors)
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing items", details: nil)) }
       case "setStyle":
@@ -114,16 +158,17 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
         } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
       case "setButtonIcon":
         if let args = call.arguments as? [String: Any] {
-          var finalImage: UIImage? = nil
-          if let name = args["buttonIconName"] as? String, var image = UIImage(systemName: name) {
-            if let sz = args["buttonIconSize"] as? NSNumber { image = image.applyingSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: CGFloat(truncating: sz))) ?? image }
-            if let c = args["buttonIconColor"] as? NSNumber, #available(iOS 13.0, *) {
-              image = image.withTintColor(Self.colorFromARGB(c.intValue), renderingMode: .alwaysOriginal)
-            }
-            finalImage = image
+          // Update cached props
+          if let name = args["buttonIconName"] as? String { self.btnIconName = name }
+          if let s = args["buttonIconSize"] as? NSNumber { self.btnIconSize = CGFloat(truncating: s) }
+          if let c = args["buttonIconColor"] as? NSNumber { self.btnIconColor = Self.colorFromARGB(c.intValue) }
+          if let m = args["buttonIconRenderingMode"] as? String { self.btnIconMode = m }
+          if let pal = args["buttonIconPaletteColors"] as? [NSNumber] { self.btnIconPalette = pal.map { Self.colorFromARGB($0.intValue) } }
+          self.setButtonContent(title: nil, image: self.makeButtonIconImage(), iconOnly: true)
+          if #available(iOS 15.0, *), var cfg = self.button.configuration {
+            cfg.preferredSymbolConfigurationForImage = self.makeButtonSymbolConfiguration()
+            self.button.configuration = cfg
           }
-          // Do not change style on icon updates; just update content.
-          self.setButtonContent(title: nil, image: finalImage, iconOnly: true)
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing icon args", details: nil)) }
       case "setBrightness":
@@ -169,7 +214,44 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
           let s = CGFloat(truncating: sizes[i])
           if s > 0, let img = image { image = img.applyingSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: s)) }
         }
-        if let colors = defaultColors, i < colors.count {
+        // Rendering mode: prefer explicit per-item mode when provided; else fallback to color
+        if i < self.itemModes.count, let mode = self.itemModes[i] {
+          switch mode {
+          case "hierarchical":
+            if #available(iOS 15.0, *), let colors = defaultColors, i < colors.count {
+              let c = Self.colorFromARGB(colors[i].intValue)
+              if let img = image {
+                let cfg = UIImage.SymbolConfiguration(hierarchicalColor: c)
+                image = img.applyingSymbolConfiguration(cfg)
+              }
+            }
+          case "palette":
+            if #available(iOS 15.0, *), i < self.itemPalettes.count, !self.itemPalettes[i].isEmpty {
+              let cols = self.itemPalettes[i].map { Self.colorFromARGB($0.intValue) }
+              if let img = image {
+                let cfg = UIImage.SymbolConfiguration(paletteColors: cols)
+                image = img.applyingSymbolConfiguration(cfg)
+              }
+            }
+          case "multicolor":
+            if #available(iOS 15.0, *) {
+              if let img = image {
+                let cfg = UIImage.SymbolConfiguration.preferringMulticolor()
+                image = img.applyingSymbolConfiguration(cfg)
+              }
+            }
+          case "monochrome":
+            // Explicit monochrome: use direct tint color if provided
+            if let colors = defaultColors, i < colors.count {
+              let c = Self.colorFromARGB(colors[i].intValue)
+              if let img = image, #available(iOS 13.0, *) {
+                image = img.withTintColor(c, renderingMode: .alwaysOriginal)
+              }
+            }
+          default:
+            break
+          }
+        } else if let colors = defaultColors, i < colors.count {
           let c = Self.colorFromARGB(colors[i].intValue)
           if let img = image, #available(iOS 13.0, *) {
             image = img.withTintColor(c, renderingMode: .alwaysOriginal)
@@ -236,6 +318,62 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
     let g = CGFloat((argb >> 8) & 0xFF) / 255.0
     let b = CGFloat(argb & 0xFF) / 255.0
     return UIColor(red: r, green: g, blue: b, alpha: a)
+  }
+
+  @available(iOS 13.0, *)
+  private func makeButtonIconImage() -> UIImage? {
+    guard let name = btnIconName, var image = UIImage(systemName: name) else { return nil }
+    if let sz = btnIconSize {
+      image = image.applyingSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: sz)) ?? image
+    }
+    if let mode = btnIconMode {
+      switch mode {
+      case "hierarchical":
+        if #available(iOS 15.0, *), let c = btnIconColor {
+          let cfg = UIImage.SymbolConfiguration(hierarchicalColor: c)
+          image = image.applyingSymbolConfiguration(cfg) ?? image
+        }
+      case "palette":
+        if #available(iOS 15.0, *), !btnIconPalette.isEmpty {
+          let cfg = UIImage.SymbolConfiguration(paletteColors: btnIconPalette)
+          image = image.applyingSymbolConfiguration(cfg) ?? image
+        }
+      case "multicolor":
+        if #available(iOS 15.0, *) {
+          let cfg = UIImage.SymbolConfiguration.preferringMulticolor()
+          image = image.applyingSymbolConfiguration(cfg) ?? image
+        }
+      default:
+        break
+      }
+    } else if let col = btnIconColor {
+      if #available(iOS 15.0, *) {
+        let cfg = UIImage.SymbolConfiguration(hierarchicalColor: col)
+        image = image.applyingSymbolConfiguration(cfg) ?? image
+      } else {
+        image = image.withTintColor(col, renderingMode: .alwaysOriginal)
+      }
+    }
+    return image
+  }
+
+  @available(iOS 15.0, *)
+  private func makeButtonSymbolConfiguration() -> UIImage.SymbolConfiguration? {
+    if let mode = btnIconMode {
+      switch mode {
+      case "hierarchical":
+        if let c = btnIconColor { return UIImage.SymbolConfiguration(hierarchicalColor: c) }
+      case "palette":
+        if !btnIconPalette.isEmpty { return UIImage.SymbolConfiguration(paletteColors: btnIconPalette) }
+      case "multicolor":
+        return UIImage.SymbolConfiguration.preferringMulticolor()
+      default:
+        break
+      }
+    } else if let c = btnIconColor {
+      return UIImage.SymbolConfiguration(hierarchicalColor: c)
+    }
+    return nil
   }
 
   private func applyButtonStyle(buttonStyle: String, round: Bool) {

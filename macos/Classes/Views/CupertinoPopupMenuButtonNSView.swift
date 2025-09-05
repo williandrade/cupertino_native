@@ -9,6 +9,11 @@ class CupertinoPopupMenuButtonNSView: NSView {
   private var symbols: [String] = []
   private var dividers: [Bool] = []
   private var enabled: [Bool] = []
+  private var defaultSizes: [NSNumber] = []
+  private var defaultColors: [NSNumber] = []
+  private var defaultModes: [String?] = []
+  private var defaultPalettes: [[NSNumber]] = []
+  private var defaultGradients: [NSNumber?] = []
 
   init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
     self.channel = FlutterMethodChannel(name: "CupertinoNativePopupMenuButton_\(viewId)", binaryMessenger: messenger)
@@ -27,6 +32,10 @@ class CupertinoPopupMenuButtonNSView: NSView {
     var symbols: [String] = []
     var dividers: [NSNumber] = []
     var enabled: [NSNumber] = []
+    var sizes: [NSNumber] = []
+    var colors: [NSNumber] = []
+    var buttonIconMode: String? = nil
+    var buttonIconPalette: [NSNumber] = []
 
     if let dict = args as? [String: Any] {
       if let t = dict["buttonTitle"] as? String { title = t }
@@ -41,6 +50,13 @@ class CupertinoPopupMenuButtonNSView: NSView {
       symbols = (dict["sfSymbols"] as? [String]) ?? []
       dividers = (dict["isDivider"] as? [NSNumber]) ?? []
       enabled = (dict["enabled"] as? [NSNumber]) ?? []
+      if let modes = dict["sfSymbolRenderingModes"] as? [String?] { self.defaultModes = modes }
+      if let palettes = dict["sfSymbolPaletteColors"] as? [[NSNumber]] { self.defaultPalettes = palettes }
+      if let gradients = dict["sfSymbolGradientEnabled"] as? [NSNumber?] { self.defaultGradients = gradients }
+      if let m = dict["buttonIconRenderingMode"] as? String { buttonIconMode = m }
+      if let pal = dict["buttonIconPaletteColors"] as? [NSNumber] { buttonIconPalette = pal }
+      sizes = (dict["sfSymbolSizes"] as? [NSNumber]) ?? []
+      colors = (dict["sfSymbolColors"] as? [NSNumber]) ?? []
     }
 
     wantsLayer = true
@@ -52,6 +68,30 @@ class CupertinoPopupMenuButtonNSView: NSView {
       if #available(macOS 12.0, *), let sz = iconSize {
         let cfg = NSImage.SymbolConfiguration(pointSize: sz, weight: .regular)
         image = image.withSymbolConfiguration(cfg) ?? image
+      }
+      if let mode = buttonIconMode {
+        switch mode {
+        case "hierarchical":
+          if #available(macOS 12.0, *), let c = iconColor {
+            let cfg = NSImage.SymbolConfiguration(hierarchicalColor: c)
+            image = image.withSymbolConfiguration(cfg) ?? image
+          }
+        case "palette":
+          if #available(macOS 12.0, *), !buttonIconPalette.isEmpty {
+            let cols = buttonIconPalette.map { Self.colorFromARGB($0.intValue) }
+            let cfg = NSImage.SymbolConfiguration(paletteColors: cols)
+            image = image.withSymbolConfiguration(cfg) ?? image
+          }
+        case "multicolor":
+          if #available(macOS 12.0, *) {
+            let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
+            image = image.withSymbolConfiguration(cfg) ?? image
+          }
+        default:
+          break
+        }
+      } else if let c = iconColor {
+        image = image.tinted(with: c)
       }
       button.image = image
       button.imagePosition = .imageOnly
@@ -85,7 +125,9 @@ class CupertinoPopupMenuButtonNSView: NSView {
     self.symbols = symbols
     self.dividers = dividers.map { $0.boolValue }
     self.enabled = enabled.map { $0.boolValue }
-    rebuildMenu()
+    self.defaultSizes = sizes
+    self.defaultColors = colors
+    rebuildMenu(defaultSizes: sizes, defaultColors: colors)
 
     button.target = self
     button.action = #selector(onButtonPressed(_:))
@@ -102,7 +144,12 @@ class CupertinoPopupMenuButtonNSView: NSView {
           self.symbols = (args["sfSymbols"] as? [String]) ?? []
           self.dividers = ((args["isDivider"] as? [NSNumber]) ?? []).map { $0.boolValue }
           self.enabled = ((args["enabled"] as? [NSNumber]) ?? []).map { $0.boolValue }
-          self.rebuildMenu()
+          self.defaultSizes = (args["sfSymbolSizes"] as? [NSNumber]) ?? []
+          self.defaultColors = (args["sfSymbolColors"] as? [NSNumber]) ?? []
+          self.defaultModes = (args["sfSymbolRenderingModes"] as? [String?]) ?? []
+          self.defaultPalettes = (args["sfSymbolPaletteColors"] as? [[NSNumber]]) ?? []
+          self.defaultGradients = (args["sfSymbolGradientEnabled"] as? [NSNumber?]) ?? []
+          self.rebuildMenu(defaultSizes: self.defaultSizes, defaultColors: self.defaultColors)
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing items", details: nil)) }
       case "setStyle":
@@ -129,6 +176,30 @@ class CupertinoPopupMenuButtonNSView: NSView {
             if #available(macOS 12.0, *), let sz = args["buttonIconSize"] as? NSNumber {
               let cfg = NSImage.SymbolConfiguration(pointSize: CGFloat(truncating: sz), weight: .regular)
               image = image.withSymbolConfiguration(cfg) ?? image
+            }
+            if let mode = args["buttonIconRenderingMode"] as? String {
+              switch mode {
+              case "hierarchical":
+                if #available(macOS 12.0, *), let c = args["buttonIconColor"] as? NSNumber {
+                  let cfg = NSImage.SymbolConfiguration(hierarchicalColor: Self.colorFromARGB(c.intValue))
+                  image = image.withSymbolConfiguration(cfg) ?? image
+                }
+              case "palette":
+                if #available(macOS 12.0, *), let pal = args["buttonIconPaletteColors"] as? [NSNumber] {
+                  let cols = pal.map { Self.colorFromARGB($0.intValue) }
+                  let cfg = NSImage.SymbolConfiguration(paletteColors: cols)
+                  image = image.withSymbolConfiguration(cfg) ?? image
+                }
+              case "multicolor":
+                if #available(macOS 12.0, *) {
+                  let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
+                  image = image.withSymbolConfiguration(cfg) ?? image
+                }
+              default:
+                break
+              }
+            } else if let c = args["buttonIconColor"] as? NSNumber {
+              image = image.tinted(with: Self.colorFromARGB(c.intValue))
             }
             self.button.image = image
             self.button.imagePosition = .imageOnly
@@ -164,7 +235,7 @@ class CupertinoPopupMenuButtonNSView: NSView {
     menu.popUp(positioning: nil, at: location, in: sender)
   }
 
-  private func rebuildMenu() {
+  private func rebuildMenu(defaultSizes: [NSNumber]? = nil, defaultColors: [NSNumber]? = nil) {
     menu = NSMenu()
     let count = max(labels.count, max(symbols.count, dividers.count))
     for i in 0..<count {
@@ -178,7 +249,44 @@ class CupertinoPopupMenuButtonNSView: NSView {
       mi.tag = i
       if i < enabled.count { mi.isEnabled = enabled[i] }
       if i < symbols.count, !symbols[i].isEmpty {
-        if let img = NSImage(systemSymbolName: symbols[i], accessibilityDescription: nil) {
+        if var img = NSImage(systemSymbolName: symbols[i], accessibilityDescription: nil) {
+          if #available(macOS 12.0, *), let sizes = defaultSizes, i < sizes.count {
+            let s = CGFloat(truncating: sizes[i])
+            if s > 0 {
+              let cfg = NSImage.SymbolConfiguration(pointSize: s, weight: .regular)
+              img = img.withSymbolConfiguration(cfg) ?? img
+            }
+          }
+          if #available(macOS 12.0, *), i < defaultModes.count, let mode = defaultModes[i] {
+            switch mode {
+            case "hierarchical":
+              if let colors = defaultColors, i < colors.count {
+                let c = Self.colorFromARGB(colors[i].intValue)
+                let cfg = NSImage.SymbolConfiguration(hierarchicalColor: c)
+                img = img.withSymbolConfiguration(cfg) ?? img
+              }
+            case "palette":
+              if i < defaultPalettes.count, !defaultPalettes[i].isEmpty {
+                let cols = defaultPalettes[i].map { Self.colorFromARGB($0.intValue) }
+                let cfg = NSImage.SymbolConfiguration(paletteColors: cols)
+                img = img.withSymbolConfiguration(cfg) ?? img
+              }
+            case "multicolor":
+              let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
+              img = img.withSymbolConfiguration(cfg) ?? img
+            case "monochrome":
+              if let colors = defaultColors, i < colors.count {
+                let c = Self.colorFromARGB(colors[i].intValue)
+                img = img.tinted(with: c)
+              }
+            default:
+              break
+            }
+          } else if #available(macOS 12.0, *), let colors = defaultColors, i < colors.count {
+            let c = Self.colorFromARGB(colors[i].intValue)
+            let cfg = NSImage.SymbolConfiguration(hierarchicalColor: c)
+            img = img.withSymbolConfiguration(cfg) ?? img
+          }
           mi.image = img
         }
       }

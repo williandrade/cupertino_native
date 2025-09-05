@@ -20,6 +20,8 @@ class CupertinoButtonNSView: NSView {
     var isDark: Bool = false
     var tint: NSColor? = nil
     var enabled: Bool = true
+    var iconMode: String? = nil
+    var iconPalette: [NSNumber] = []
 
     if let dict = args as? [String: Any] {
       if let t = dict["buttonTitle"] as? String { title = t }
@@ -31,6 +33,8 @@ class CupertinoButtonNSView: NSView {
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
       if let style = dict["style"] as? [String: Any], let n = style["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
       if let e = dict["enabled"] as? NSNumber { enabled = e.boolValue }
+      if let m = dict["buttonIconRenderingMode"] as? String { iconMode = m }
+      if let pal = dict["buttonIconPaletteColors"] as? [NSNumber] { iconPalette = pal }
     }
 
     wantsLayer = true
@@ -43,7 +47,30 @@ class CupertinoButtonNSView: NSView {
         let cfg = NSImage.SymbolConfiguration(pointSize: sz, weight: .regular)
         image = image.withSymbolConfiguration(cfg) ?? image
       }
-      if let c = iconColor { image = image.tinted(with: c) }
+      if let mode = iconMode {
+        switch mode {
+        case "hierarchical":
+          if #available(macOS 12.0, *), let c = iconColor {
+            let cfg = NSImage.SymbolConfiguration(hierarchicalColor: c)
+            image = image.withSymbolConfiguration(cfg) ?? image
+          }
+        case "palette":
+          if #available(macOS 12.0, *), !iconPalette.isEmpty {
+            let cols = iconPalette.map { Self.colorFromARGB($0.intValue) }
+            let cfg = NSImage.SymbolConfiguration(paletteColors: cols)
+            image = image.withSymbolConfiguration(cfg) ?? image
+          }
+        case "multicolor":
+          if #available(macOS 12.0, *) {
+            let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
+            image = image.withSymbolConfiguration(cfg) ?? image
+          }
+        case "monochrome":
+          if let c = iconColor { image = image.tinted(with: c) }
+        default:
+          break
+        }
+      } else if let c = iconColor { image = image.tinted(with: c) }
       button.image = image
       button.imagePosition = .imageOnly
     }
@@ -120,7 +147,34 @@ class CupertinoButtonNSView: NSView {
               let cfg = NSImage.SymbolConfiguration(pointSize: CGFloat(truncating: sz), weight: .regular)
               image = image.withSymbolConfiguration(cfg) ?? image
             }
-            if let c = args["buttonIconColor"] as? NSNumber { image = image.tinted(with: Self.colorFromARGB(c.intValue)) }
+            if let mode = args["buttonIconRenderingMode"] as? String {
+              switch mode {
+              case "hierarchical":
+                if #available(macOS 12.0, *), let c = args["buttonIconColor"] as? NSNumber {
+                  let cfg = NSImage.SymbolConfiguration(hierarchicalColor: Self.colorFromARGB(c.intValue))
+                  image = image.withSymbolConfiguration(cfg) ?? image
+                }
+              case "palette":
+                if #available(macOS 12.0, *), let pal = args["buttonIconPaletteColors"] as? [NSNumber] {
+                  let cols = pal.map { Self.colorFromARGB($0.intValue) }
+                  let cfg = NSImage.SymbolConfiguration(paletteColors: cols)
+                  image = image.withSymbolConfiguration(cfg) ?? image
+                }
+              case "multicolor":
+                if #available(macOS 12.0, *) {
+                  let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
+                  image = image.withSymbolConfiguration(cfg) ?? image
+                }
+              case "monochrome":
+                if let c = args["buttonIconColor"] as? NSNumber {
+                  image = image.tinted(with: Self.colorFromARGB(c.intValue))
+                }
+              default:
+                break
+              }
+            } else if let c = args["buttonIconColor"] as? NSNumber {
+              image = image.tinted(with: Self.colorFromARGB(c.intValue))
+            }
             self.button.image = image
             self.button.title = ""
             self.button.imagePosition = .imageOnly
