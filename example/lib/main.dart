@@ -1,8 +1,5 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cupertino_native/components/button.dart';
-import 'package:cupertino_native/style/sf_symbol.dart';
-import 'package:cupertino_native/components/popup_menu_button.dart';
 import 'demos/slider.dart';
 import 'demos/switch.dart';
 import 'demos/segmented_control.dart';
@@ -141,6 +138,9 @@ class HomePage extends StatelessWidget {
               ),
               CupertinoListTile(
                 title: Text('Switch'),
+                leading: CNIcon(
+                  symbol: CNSymbol('switch.2', color: accentColor),
+                ),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(
@@ -150,6 +150,10 @@ class HomePage extends StatelessWidget {
               ),
               CupertinoListTile(
                 title: Text('Segmented Control'),
+                leading: CNIcon(
+                  symbol:
+                      CNSymbol('rectangle.split.3x1', color: accentColor),
+                ),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(
@@ -161,6 +165,9 @@ class HomePage extends StatelessWidget {
               ),
               CupertinoListTile(
                 title: Text('Icon'),
+                leading: CNIcon(
+                  symbol: CNSymbol('app', color: accentColor),
+                ),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(
@@ -170,6 +177,9 @@ class HomePage extends StatelessWidget {
               ),
               CupertinoListTile(
                 title: Text('Popup Menu Button'),
+                leading: CNIcon(
+                  symbol: CNSymbol('ellipsis.circle', color: accentColor),
+                ),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(
@@ -181,6 +191,9 @@ class HomePage extends StatelessWidget {
               ),
               CupertinoListTile(
                 title: Text('Button'),
+                leading: CNIcon(
+                  symbol: CNSymbol('hand.tap', color: accentColor),
+                ),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(
@@ -195,6 +208,9 @@ class HomePage extends StatelessWidget {
             children: [
               CupertinoListTile(
                 title: Text('Tab Bar'),
+                leading: CNIcon(
+                  symbol: CNSymbol('square.grid.2x2', color: accentColor),
+                ),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(
