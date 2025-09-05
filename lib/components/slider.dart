@@ -92,6 +92,14 @@ class _CNSliderState extends State<CNSlider> {
   CNSliderController get _controller =>
       widget.controller ?? (_internalController ??= CNSliderController());
 
+  // Default colors:
+  // - Track: use explicit trackColor, otherwise widget.color, otherwise theme primaryColor.
+  // - Thumb: only use explicit thumbColor; otherwise keep the native default.
+  Color? get _effectiveTrackTint =>
+      widget.trackColor ?? widget.color ?? CupertinoTheme.of(context).primaryColor;
+  Color? get _effectiveThumbTint => widget.thumbColor;
+  Color? get _effectiveTrackBgTint => widget.trackBackgroundColor;
+
   @override
   void dispose() {
     _channel?.setMethodCallHandler(null);
@@ -138,10 +146,10 @@ class _CNSliderState extends State<CNSlider> {
       'isDark': _isDark,
       'style': encodeStyle(
         context,
-        tint: widget.color,
-        thumbTint: widget.thumbColor,
-        trackTint: widget.trackColor,
-        trackBackgroundTint: widget.trackBackgroundColor,
+        // Do not provide a general 'tint' so the thumb color remains default.
+        trackTint: _effectiveTrackTint,
+        thumbTint: _effectiveThumbTint,
+        trackBackgroundTint: _effectiveTrackBgTint,
       ),
       if (widget.step != null) 'step': widget.step,
     };
@@ -219,10 +227,10 @@ class _CNSliderState extends State<CNSlider> {
     _lastMax = widget.max;
     _lastEnabled = widget.enabled;
     _lastIsDark = _isDark;
-    _lastTint = resolveColorToArgb(widget.color, context);
-    _lastThumbTint = resolveColorToArgb(widget.thumbColor, context);
-    _lastTrackTint = resolveColorToArgb(widget.trackColor, context);
-    _lastTrackBgTint = resolveColorToArgb(widget.trackBackgroundColor, context);
+    _lastTint = null; // Not using general tint to avoid coloring the thumb.
+    _lastThumbTint = resolveColorToArgb(_effectiveThumbTint, context);
+    _lastTrackTint = resolveColorToArgb(_effectiveTrackTint, context);
+    _lastTrackBgTint = resolveColorToArgb(_effectiveTrackBgTint, context);
     _lastStep = widget.step;
   }
 
@@ -231,10 +239,10 @@ class _CNSliderState extends State<CNSlider> {
     if (channel == null) return;
 
     // Resolve any context-dependent values before awaiting.
-    final int? tint = resolveColorToArgb(widget.color, context);
-    final int? thumb0 = resolveColorToArgb(widget.thumbColor, context);
-    final int? track0 = resolveColorToArgb(widget.trackColor, context);
-    final int? trackBg0 = resolveColorToArgb(widget.trackBackgroundColor, context);
+    final int? tint = null; // No general tint
+    final int? thumb0 = resolveColorToArgb(_effectiveThumbTint, context);
+    final int? track0 = resolveColorToArgb(_effectiveTrackTint, context);
+    final int? trackBg0 = resolveColorToArgb(_effectiveTrackBgTint, context);
 
     if (_lastMin != widget.min || _lastMax != widget.max) {
       await channel.invokeMethod('setRange', {
@@ -295,10 +303,10 @@ class _CNSliderState extends State<CNSlider> {
     if (channel == null) return;
     // Resolve theme-dependent values before awaiting.
     final isDark = _isDark;
-    final int? tint = resolveColorToArgb(widget.color, context);
-    final int? thumb = resolveColorToArgb(widget.thumbColor, context);
-    final int? track = resolveColorToArgb(widget.trackColor, context);
-    final int? trackBg = resolveColorToArgb(widget.trackBackgroundColor, context);
+    final int? tint = null; // No general tint
+    final int? thumb = resolveColorToArgb(_effectiveThumbTint, context);
+    final int? track = resolveColorToArgb(_effectiveTrackTint, context);
+    final int? trackBg = resolveColorToArgb(_effectiveTrackBgTint, context);
 
     if (_lastIsDark != isDark) {
       await channel.invokeMethod('setBrightness', {'isDark': isDark});

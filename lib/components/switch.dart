@@ -68,6 +68,9 @@ class _CNSwitchState extends State<CNSwitch> {
   CNSwitchController get _controller =>
       widget.controller ?? (_internalController ??= CNSwitchController());
 
+  Color? get _effectiveColor =>
+      widget.color ?? CupertinoTheme.of(context).primaryColor;
+
   @override
   void dispose() {
     _channel?.setMethodCallHandler(null);
@@ -106,7 +109,7 @@ class _CNSwitchState extends State<CNSwitch> {
       'value': widget.value,
       'enabled': widget.enabled,
       'isDark': _isDark,
-      'style': encodeStyle(context, tint: widget.color),
+      'style': encodeStyle(context, tint: _effectiveColor),
     };
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -174,7 +177,7 @@ class _CNSwitchState extends State<CNSwitch> {
     _lastValue = widget.value;
     _lastEnabled = widget.enabled;
     _lastIsDark = _isDark;
-    _lastTint = resolveColorToArgb(widget.color, context);
+    _lastTint = resolveColorToArgb(_effectiveColor, context);
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
@@ -182,7 +185,7 @@ class _CNSwitchState extends State<CNSwitch> {
     if (channel == null) return;
 
     // Resolve theme-dependent values before awaiting.
-    final int? tint = resolveColorToArgb(widget.color, context);
+    final int? tint = resolveColorToArgb(_effectiveColor, context);
 
     if (_lastEnabled != widget.enabled) {
       await channel.invokeMethod('setEnabled', {'enabled': widget.enabled});
@@ -208,7 +211,7 @@ class _CNSwitchState extends State<CNSwitch> {
     final channel = _channel;
     if (channel == null) return;
     final isDark = _isDark;
-    final int? tint = resolveColorToArgb(widget.color, context);
+    final int? tint = resolveColorToArgb(_effectiveColor, context);
 
     if (_lastIsDark != isDark) {
       await channel.invokeMethod('setBrightness', {'isDark': isDark});
