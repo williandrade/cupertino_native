@@ -6,6 +6,7 @@ class CupertinoButtonPlatformView: NSObject, FlutterPlatformView {
   private let container: UIView
   private let button: UIButton
   private var isEnabled: Bool = true
+  private var currentButtonStyle: String = "automatic"
 
   init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
     self.channel = FlutterMethodChannel(name: "CupertinoNativeButton_\(viewId)", binaryMessenger: messenger)
@@ -56,6 +57,7 @@ class CupertinoButtonPlatformView: NSObject, FlutterPlatformView {
     ])
 
     applyButtonStyle(buttonStyle: buttonStyle, round: makeRound)
+    currentButtonStyle = buttonStyle
     button.isEnabled = enabled
     isEnabled = enabled
 
@@ -106,8 +108,15 @@ class CupertinoButtonPlatformView: NSObject, FlutterPlatformView {
         result(["width": Double(size.width), "height": Double(size.height)])
       case "setStyle":
         if let args = call.arguments as? [String: Any] {
-          if let n = args["tint"] as? NSNumber { self.button.tintColor = Self.colorFromARGB(n.intValue) }
-          if let bs = args["buttonStyle"] as? String { self.applyButtonStyle(buttonStyle: bs, round: makeRound) }
+          if let n = args["tint"] as? NSNumber {
+            self.button.tintColor = Self.colorFromARGB(n.intValue)
+            // Re-apply style so configuration picks up new base colors
+            self.applyButtonStyle(buttonStyle: self.currentButtonStyle, round: makeRound)
+          }
+          if let bs = args["buttonStyle"] as? String {
+            self.currentButtonStyle = bs
+            self.applyButtonStyle(buttonStyle: bs, round: makeRound)
+          }
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
       case "setEnabled":
@@ -217,6 +226,19 @@ class CupertinoButtonPlatformView: NSObject, FlutterPlatformView {
         config = .plain()
       }
       config.cornerStyle = round ? .capsule : .dynamic
+      // Apply theme tint to configuration in a platform-standard way
+      if let tint = button.tintColor {
+        switch buttonStyle {
+        case "filled", "borderedProminent", "prominentGlass":
+          // Treat prominentGlass like filled: color the background and let system pick readable foreground
+          config.baseBackgroundColor = tint
+        case "tinted", "bordered", "gray", "plain", "glass":
+          // Foreground-only tint
+          config.baseForegroundColor = tint
+        default:
+          break
+        }
+      }
       button.configuration = config
     } else {
       button.layer.cornerRadius = round ? 999 : 8

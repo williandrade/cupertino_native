@@ -110,7 +110,14 @@ class CupertinoPopupMenuButtonNSView: NSView {
     }
     if makeRound { button.bezelStyle = .circular }
     button.setButtonType(.momentaryPushIn)
-    if #available(macOS 10.14, *), let c = tint { button.contentTintColor = c }
+    if #available(macOS 10.14, *), let c = tint {
+      if ["filled", "borderedProminent", "prominentGlass"].contains(buttonStyle) {
+        button.bezelColor = c
+        button.contentTintColor = .white
+      } else {
+        button.contentTintColor = c
+      }
+    }
 
     addSubview(button)
     button.translatesAutoresizingMaskIntoConstraints = false
@@ -154,7 +161,15 @@ class CupertinoPopupMenuButtonNSView: NSView {
         } else { result(FlutterError(code: "bad_args", message: "Missing items", details: nil)) }
       case "setStyle":
         if let args = call.arguments as? [String: Any] {
-          if #available(macOS 10.14, *), let n = args["tint"] as? NSNumber { self.button.contentTintColor = Self.colorFromARGB(n.intValue) }
+          if #available(macOS 10.14, *), let n = args["tint"] as? NSNumber {
+            let color = Self.colorFromARGB(n.intValue)
+            if ["filled", "borderedProminent", "prominentGlass"].contains(buttonStyle) {
+              self.button.bezelColor = color
+              self.button.contentTintColor = .white
+            } else {
+              self.button.contentTintColor = color
+            }
+          }
           if let bs = args["buttonStyle"] as? String {
             switch bs {
             case "plain": self.button.bezelStyle = .borderless

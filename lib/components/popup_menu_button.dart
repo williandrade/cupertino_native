@@ -85,6 +85,8 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
   bool _pressed = false;
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   @override
   void didUpdateWidget(covariant CNPopupMenuButton oldWidget) {
@@ -215,7 +217,7 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
       'sfSymbolPaletteColors': palettes,
       'sfSymbolGradientEnabled': gradients,
       'isDark': _isDark,
-      'style': encodeStyle(context, tint: widget.tint),
+      'style': encodeStyle(context, tint: _effectiveTint),
       if (widget.buttonIcon?.mode != null)
         'buttonIconRenderingMode': widget.buttonIcon!.mode!.name,
       if (widget.buttonIcon?.paletteColors != null)
@@ -294,7 +296,7 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
     final ch = MethodChannel('CupertinoNativePopupMenuButton_$id');
     _channel = ch;
     ch.setMethodCallHandler(_onMethodCall);
-    _lastTint = resolveColorToArgb(widget.tint, context);
+    _lastTint = resolveColorToArgb(_effectiveTint, context);
     _lastIsDark = _isDark;
     _lastTitle = widget.buttonLabel;
     _lastIconName = widget.buttonIcon?.name;
@@ -366,7 +368,7 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
       }
     }
     // Capture context-dependent values before any awaits
-    final tint = resolveColorToArgb(widget.tint, context);
+    final tint = resolveColorToArgb(_effectiveTint, context);
     final preIconName = widget.buttonIcon?.name;
     final preIconSize = widget.buttonIcon?.size;
     final preIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
@@ -435,10 +437,16 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
   Future<void> _syncBrightnessIfNeeded() async {
     final ch = _channel;
     if (ch == null) return;
+    // Capture values before awaiting
     final isDark = _isDark;
+    final tint = resolveColorToArgb(_effectiveTint, context);
     if (_lastIsDark != isDark) {
       await ch.invokeMethod('setBrightness', {'isDark': isDark});
       _lastIsDark = isDark;
+    }
+    if (_lastTint != tint && tint != null) {
+      await ch.invokeMethod('setStyle', {'tint': tint});
+      _lastTint = tint;
     }
   }
 

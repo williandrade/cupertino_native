@@ -5,6 +5,7 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
   private let channel: FlutterMethodChannel
   private let container: UIView
   private let button: UIButton
+  private var currentButtonStyle: String = "automatic"
   private var isRoundButton: Bool = false
   private var labels: [String] = []
   private var symbols: [String] = []
@@ -93,6 +94,7 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
 
     self.isRoundButton = makeRound
     applyButtonStyle(buttonStyle: buttonStyle, round: makeRound)
+    currentButtonStyle = buttonStyle
     // Now set content (title/image) using configuration when available
     // Cache current icon props for state updates
     self.btnIconName = iconName
@@ -152,8 +154,19 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
         } else { result(FlutterError(code: "bad_args", message: "Missing items", details: nil)) }
       case "setStyle":
         if let args = call.arguments as? [String: Any] {
-          if let n = args["tint"] as? NSNumber { self.button.tintColor = Self.colorFromARGB(n.intValue) }
-          if let bs = args["buttonStyle"] as? String { self.applyButtonStyle(buttonStyle: bs, round: self.isRoundButton) }
+          if let n = args["tint"] as? NSNumber {
+            self.button.tintColor = Self.colorFromARGB(n.intValue)
+            self.applyButtonStyle(buttonStyle: self.currentButtonStyle, round: self.isRoundButton)
+            // If no explicit icon color/mode is set, color the symbol with tint
+            if #available(iOS 15.0, *), self.btnIconColor == nil, self.btnIconMode == nil, let tint = self.button.tintColor, var cfg = self.button.configuration {
+              cfg.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(hierarchicalColor: tint)
+              self.button.configuration = cfg
+            }
+          }
+          if let bs = args["buttonStyle"] as? String {
+            self.currentButtonStyle = bs
+            self.applyButtonStyle(buttonStyle: bs, round: self.isRoundButton)
+          }
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
       case "setButtonIcon":
@@ -394,6 +407,18 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
         config = .plain()
       }
       config.cornerStyle = round ? .capsule : .dynamic
+      if let tint = button.tintColor {
+        switch buttonStyle {
+        case "filled", "borderedProminent":
+          config.baseBackgroundColor = tint
+        case "tinted", "bordered":
+          config.baseForegroundColor = tint
+        case "gray", "plain", "glass", "prominentGlass":
+          config.baseForegroundColor = tint
+        default:
+          break
+        }
+      }
       button.configuration = config
     } else {
       button.layer.cornerRadius = round ? 999 : 8

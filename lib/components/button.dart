@@ -68,6 +68,9 @@ class _CNButtonState extends State<CNButton> {
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
+
   @override
   void dispose() {
     _channel?.setMethodCallHandler(null);
@@ -126,7 +129,7 @@ class _CNButtonState extends State<CNButton> {
       'buttonStyle': widget.style.name,
       'enabled': (widget.enabled && widget.onPressed != null),
       'isDark': _isDark,
-      'style': encodeStyle(context, tint: widget.tint),
+      'style': encodeStyle(context, tint: _effectiveTint),
     };
 
     final platformView = defaultTargetPlatform == TargetPlatform.iOS
@@ -192,7 +195,7 @@ class _CNButtonState extends State<CNButton> {
     final ch = MethodChannel('CupertinoNativeButton_$id');
     _channel = ch;
     ch.setMethodCallHandler(_onMethodCall);
-    _lastTint = resolveColorToArgb(widget.tint, context);
+    _lastTint = resolveColorToArgb(_effectiveTint, context);
     _lastIsDark = _isDark;
     _lastTitle = widget.label;
     _lastIconName = widget.icon?.name;
@@ -230,7 +233,7 @@ class _CNButtonState extends State<CNButton> {
   Future<void> _syncPropsToNativeIfNeeded() async {
     final ch = _channel;
     if (ch == null) return;
-    final tint = resolveColorToArgb(widget.tint, context);
+    final tint = resolveColorToArgb(_effectiveTint, context);
     final preIconName = widget.icon?.name;
     final preIconSize = widget.icon?.size;
     final preIconColor = resolveColorToArgb(widget.icon?.color, context);
@@ -292,10 +295,17 @@ class _CNButtonState extends State<CNButton> {
   Future<void> _syncBrightnessIfNeeded() async {
     final ch = _channel;
     if (ch == null) return;
+    // Capture context-derived values before any awaits
     final isDark = _isDark;
+    final tint = resolveColorToArgb(_effectiveTint, context);
     if (_lastIsDark != isDark) {
       await ch.invokeMethod('setBrightness', {'isDark': isDark});
       _lastIsDark = isDark;
+    }
+    // Also propagate theme-driven tint changes (e.g., accent color changes)
+    if (_lastTint != tint && tint != null) {
+      await ch.invokeMethod('setStyle', {'tint': tint});
+      _lastTint = tint;
     }
   }
 

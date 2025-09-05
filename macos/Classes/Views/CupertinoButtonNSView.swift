@@ -5,6 +5,7 @@ class CupertinoButtonNSView: NSView {
   private let channel: FlutterMethodChannel
   private let button: NSButton
   private var isEnabled: Bool = true
+  private var currentButtonStyle: String = "automatic"
 
   init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
     self.channel = FlutterMethodChannel(name: "CupertinoNativeButton_\(viewId)", binaryMessenger: messenger)
@@ -88,7 +89,15 @@ class CupertinoButtonNSView: NSView {
     }
     if makeRound { button.bezelStyle = .circular }
     button.setButtonType(.momentaryPushIn)
-    if #available(macOS 10.14, *), let c = tint { button.contentTintColor = c }
+    if #available(macOS 10.14, *), let c = tint {
+      if ["filled", "borderedProminent", "prominentGlass"].contains(buttonStyle) {
+        button.bezelColor = c
+        button.contentTintColor = .white
+      } else {
+        button.contentTintColor = c
+      }
+    }
+    currentButtonStyle = buttonStyle
     button.isEnabled = enabled
     isEnabled = enabled
 
@@ -112,8 +121,17 @@ class CupertinoButtonNSView: NSView {
         result(["width": Double(s.width), "height": Double(s.height)])
       case "setStyle":
         if let args = call.arguments as? [String: Any] {
-          if #available(macOS 10.14, *), let n = args["tint"] as? NSNumber { self.button.contentTintColor = Self.colorFromARGB(n.intValue) }
+          if #available(macOS 10.14, *), let n = args["tint"] as? NSNumber {
+            let color = Self.colorFromARGB(n.intValue)
+            if ["filled", "borderedProminent", "prominentGlass"].contains(self.currentButtonStyle) {
+              self.button.bezelColor = color
+              self.button.contentTintColor = .white
+            } else {
+              self.button.contentTintColor = color
+            }
+          }
           if let bs = args["buttonStyle"] as? String {
+            self.currentButtonStyle = bs
             switch bs {
             case "plain": self.button.bezelStyle = .borderless
             case "gray": self.button.bezelStyle = .texturedRounded
@@ -124,6 +142,9 @@ class CupertinoButtonNSView: NSView {
             case "glass": self.button.bezelStyle = .texturedRounded
             case "prominentGlass": self.button.bezelStyle = .texturedRounded
             default: self.button.bezelStyle = .rounded
+            }
+            if #available(macOS 10.14, *), let c = self.button.contentTintColor, ["filled", "borderedProminent"].contains(self.currentButtonStyle) {
+              self.button.bezelColor = c
             }
           }
           result(nil)
