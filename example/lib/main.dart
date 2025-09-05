@@ -1,6 +1,8 @@
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cupertino_native/components/button.dart';
 import 'package:cupertino_native/style/sf_symbol.dart';
+import 'package:cupertino_native/components/popup_menu_button.dart';
 import 'demos/slider.dart';
 import 'demos/switch.dart';
 import 'demos/segmented_control.dart';
@@ -22,10 +24,17 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _isDarkMode = false;
+  Color _accentColor = CupertinoColors.systemBlue;
 
   void _toggleTheme() {
     setState(() {
       _isDarkMode = !_isDarkMode;
+    });
+  }
+
+  void _setAccentColor(Color color) {
+    setState(() {
+      _accentColor = color;
     });
   }
 
@@ -34,8 +43,14 @@ class _MyAppState extends State<MyApp> {
     return CupertinoApp(
       theme: CupertinoThemeData(
         brightness: _isDarkMode ? Brightness.dark : Brightness.light,
+        primaryColor: _accentColor,
       ),
-      home: HomePage(isDarkMode: _isDarkMode, onToggleTheme: _toggleTheme),
+      home: HomePage(
+        isDarkMode: _isDarkMode,
+        onToggleTheme: _toggleTheme,
+        accentColor: _accentColor,
+        onSelectAccentColor: _setAccentColor,
+      ),
     );
   }
 }
@@ -45,24 +60,65 @@ class HomePage extends StatelessWidget {
     super.key,
     required this.isDarkMode,
     required this.onToggleTheme,
+    required this.accentColor,
+    required this.onSelectAccentColor,
   });
 
   final bool isDarkMode;
   final VoidCallback onToggleTheme;
+  final Color accentColor;
+  final ValueChanged<Color> onSelectAccentColor;
+
+  static const _systemColors = <MapEntry<String, Color>>[
+    MapEntry('Red', CupertinoColors.systemRed),
+    MapEntry('Orange', CupertinoColors.systemOrange),
+    MapEntry('Yellow', CupertinoColors.systemYellow),
+    MapEntry('Green', CupertinoColors.systemGreen),
+    MapEntry('Teal', CupertinoColors.systemTeal),
+    MapEntry('Blue', CupertinoColors.systemBlue),
+    MapEntry('Indigo', CupertinoColors.systemIndigo),
+    MapEntry('Purple', CupertinoColors.systemPurple),
+    MapEntry('Pink', CupertinoColors.systemPink),
+    MapEntry('Gray', CupertinoColors.systemGrey),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = CupertinoTheme.of(context);
-
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
         backgroundColor: CupertinoColors.systemGroupedBackground,
         border: null,
         // middle: const Text('Cupertino Native'),
-        trailing: CNButton.icon(
-          icon: CNSymbol(isDarkMode ? 'sun.max.fill' : 'moon.fill', size: 18),
-          onPressed: onToggleTheme,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CNPopupMenuButton.icon(
+              buttonIcon: CNSymbol(
+                'paintpalette.fill',
+                size: 18,
+                mode: CNSFSymbolRenderingMode.multicolor,
+              ),
+              tint: accentColor,
+              items: [
+                for (final entry in _systemColors)
+                  CNPopupMenuItem(
+                    label: entry.key,
+                    icon: CNSymbol('circle.fill', size: 18, color: entry.value),
+                  ),
+              ],
+              onSelected: (index) {
+                if (index >= 0 && index < _systemColors.length) {
+                  onSelectAccentColor(_systemColors[index].value);
+                }
+              },
+            ),
+            const SizedBox(width: 8),
+            CNButton.icon(
+              icon: CNSymbol(isDarkMode ? 'sun.max' : 'moon', size: 18),
+              onPressed: onToggleTheme,
+            ),
+          ],
         ),
       ),
       child: ListView(
@@ -73,6 +129,9 @@ class HomePage extends StatelessWidget {
             children: [
               CupertinoListTile(
                 title: Text('Slider'),
+                leading: CNIcon(
+                  symbol: CNSymbol('slider.horizontal.3', color: accentColor),
+                ),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(
