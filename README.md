@@ -1,34 +1,12 @@
 # cupertino_native
 
-Native iOS and macOS widgets in Flutter with pixel‑perfect fidelity.
+Native Liquid Glass widgets for iOS and macOS in Flutter with pixel‑perfect fidelity.
 
-cupertino_native hosts real UIKit/AppKit controls inside Flutter using Platform Views and MethodChannels. It aims to match native look/feel while fitting naturally into Flutter code.
+cupertino_native hosts real UIKit/AppKit controls inside Flutter using Platform Views and MethodChannels. It matches native look/feel while still fitting naturally into Flutter code.
 
-Supported platforms: iOS and macOS. Graceful fallbacks are provided on other platforms using standard Flutter widgets.
+Does it work and is it fast? Yes. Is it a vibe-coded Frankenstein's monster patched together with duct tape? Also yes.
 
-## Features
-
-- Native rendering: UIKit on iOS, AppKit on macOS
-- Dark mode aware: syncs with `CupertinoTheme` brightness
-- Tinting and style control with dynamic color resolution
-- SF Symbols support with multiple rendering modes
-- Intrinsic sizing for views that can shrink‑wrap
-- Fallbacks to Flutter widgets for non‑Apple targets
-
-## Controls
-
-- Switch: `CNSwitch`
-- Slider: `CNSlider`
-- Segmented control: `CNSegmentedControl`
-- Icon (SF Symbols): `CNIcon`
-- Tab bar: `CNTabBar` + `CNTabBarItem`
-
-## Requirements
-
-- Flutter: `>= 3.3.0`
-- Dart SDK: `>= 3.9.0`
-- iOS: 14.0+
-- macOS: 11.0+
+This package is meant as a proof of concept of how we can bring Liquid Glass to Flutter. Contributions are most welcome, what we have here can serve as a great starting point for building a complete, polished library. The vision for this package is to bridge the gap until we have a good, new Cupertino library written entierly in Flutter. To make it more complete, we can also improve the parts that are easy to write in Flutter to match the new Liquid Glass style (e.g. improved CupertinoScaffold, theme, etc).
 
 ## Installation
 
@@ -41,170 +19,26 @@ dependencies:
 
 Then run `flutter pub get`.
 
-No additional setup is required, but ensure your platform minimums are compatible:
+Ensure your platform minimums are compatible:
 
 - iOS `platform :ios, '14.0'`
 - macOS 11.0+
 
-## Usage
-
-Import the package:
-
-```dart
-import 'package:cupertino_native/cupertino_native.dart';
-```
-
-### Switch
-
-```dart
-CNSwitch(
-  value: isOn,
-  onChanged: (v) => setState(() => isOn = v),
-  color: CupertinoColors.systemPink, // optional tint
-)
-```
-
-### Slider
-
-```dart
-CNSlider(
-  value: progress,
-  min: 0,
-  max: 100,
-  onChanged: (v) => setState(() => progress = v),
-  step: 10, // optional stepping
-  thumbColor: CupertinoColors.systemPink,
-  trackColor: CupertinoColors.systemBlue,
-  trackBackgroundColor: CupertinoColors.systemGrey2,
-)
-```
-
-### Segmented Control
-
-Text labels:
-
-```dart
-CNSegmentedControl(
-  labels: const ['One', 'Two', 'Three'],
-  selectedIndex: index,
-  onValueChanged: (i) => setState(() => index = i),
-  tint: CupertinoColors.systemPink, // optional
-)
-```
-
-SF Symbols:
-
-```dart
-CNSegmentedControl(
-  labels: const [],
-  sfSymbols: const [
-    CNSymbol('heart.fill', size: 22, color: CupertinoColors.systemPink),
-    CNSymbol('star.fill',  size: 18, color: CupertinoColors.systemYellow),
-    CNSymbol('bell.fill',  size: 26, color: CupertinoColors.systemBlue),
-  ],
-  selectedIndex: index,
-  onValueChanged: (i) => setState(() => index = i),
-  // Or set global icon options:
-  // iconSize: 20,
-  // iconColor: CupertinoColors.systemBlue,
-  // iconRenderingMode: CNSFSymbolRenderingMode.hierarchical,
-)
-```
-
-### Icon (SF Symbols)
-
-```dart
-const CNIcon(
-  symbol: CNSymbol(
-    'star.fill',
-    size: 28,
-    color: CupertinoColors.systemYellow,
-    mode: CNSFSymbolRenderingMode.monochrome,
-  ),
-)
-```
-
-Palette and multicolor modes are supported where available by the OS. Set `paletteColors` and `mode: CNSFSymbolRenderingMode.palette` for palette icons, or `mode: CNSFSymbolRenderingMode.multicolor` for OS‑defined multicolor.
-
-### Tab Bar
-
-`CNTabBar` renders a native tab bar you can overlay on your page and sync with a `TabController` or app state.
-
-```dart
-Align(
-  alignment: Alignment.bottomCenter,
-  child: CNTabBar(
-    items: const [
-      CNTabBarItem(label: 'Home',    icon: CNSymbol('house.fill', size: 22)),
-      CNTabBarItem(label: 'Profile', icon: CNSymbol('person.crop.circle', size: 22)),
-      CNTabBarItem(label: 'Settings',icon: CNSymbol('gearshape.fill', size: 22)),
-      CNTabBarItem(                  icon: CNSymbol('magnifyingglass', size: 22)),
-    ],
-    currentIndex: index,
-    onTap: (i) => setState(() => index = i),
-    // Optional layout options:
-    split: true,
-    rightCount: 1,
-    shrinkCentered: true,
-  ),
-)
-```
-
-## API Overview
-
-Key props (not exhaustive):
-
-- `CNSwitch`
-  - `value`, `onChanged`, `enabled`, `height`, `color`, `controller`
-- `CNSlider`
-  - `value`, `onChanged`, `min`, `max`, `enabled`, `height`
-  - `color`, `thumbColor`, `trackColor`, `trackBackgroundColor`, `step`, `controller`
-- `CNSegmentedControl`
-  - `labels` or `sfSymbols`, `selectedIndex`, `onValueChanged`, `enabled`, `height`, `tint`, `shrinkWrap`
-  - Icon options: `iconSize`, `iconColor`, `iconPaletteColors`, `iconRenderingMode`, `iconGradientEnabled`
-- `CNIcon`
-  - `symbol` (`CNSymbol`), `size`, `color`, `mode`, `gradient`, `height`
-- `CNTabBar`
-  - `items`, `currentIndex`, `onTap`, `tint`, `backgroundColor`, `iconSize`, `height`
-  - Layout: `split`, `rightCount`, `shrinkCentered`, `splitSpacing`
-
-## Behavior and Caveats
-
-- Platform views: These widgets are hosted in native views (`UiKitView`/`AppKitView`). Some Flutter effects that rely on advanced compositing, clipping, or transforms can behave differently than pure Flutter widgets.
-- Theming: Colors are resolved against `CupertinoTheme`. `CupertinoDynamicColor` values are resolved to concrete ARGB on the platform side.
-- Fallbacks: On non‑Apple targets, equivalent Flutter widgets are used (`CupertinoSegmentedControl`, `CupertinoTabBar`, `Slider`, `Switch`). Functionality and appearance may not be identical.
-- Gestures: Sliders and switches forward relevant gesture recognizers (drag/tap) to ensure correct behavior inside scroll views.
-- Sizing: Some widgets support intrinsic measurement (e.g., segmented control and tab bar). Use `shrinkWrap` or allow the widget to size itself when appropriate.
-
-## Example App
-
-An example showcasing all controls is included:
+You will also need to install the XCode 26 beta and use `xcode-select` to set it as your default.
 
 ```bash
-cd example
-flutter pub get
-flutter run -d macos   # or: flutter run -d ios
+sudo xcode-select -s /Applications/Xcode-beta.app
 ```
 
-Relevant demo pages:
+## What's left to do?
+So far, this is more of a proof of concept than a full package (although, the components in the do work). Future improvements include:
 
-- `example/lib/demos/switch.dart`
-- `example/lib/demos/slider.dart`
-- `example/lib/demos/segmented_control.dart`
-- `example/lib/demos/icon.dart`
-- `example/lib/demos/tab_bar.dart`
+- Cleaning up the code. Probably by someone who knows a bit about Swift.
+- Adding more native components.
+- Reviewing the Flutter APIs, making sure everything is consistent and there are no redundencies.
+- Extend the flexibility an styling options of the widgets.
+- Investigate how to best combine scroll views with the native components.
+- MacOS compiles and runs, but untested with Liquid Glass and generally doesn't look too good.
 
-## Contributing
-
-Contributions are welcome! Please follow these conventions when adding a new widget:
-
-- Separate file and class under `lib/components`.
-- Add a demo page under `example/lib/demos`.
-- Implement corresponding Swift code for iOS under `ios/Classes` and for macOS under `macos/Classes`.
-- Register the platform view factory with a unique viewType (e.g., `CupertinoNativeMyControl`).
-- Follow Flutter style conventions and keep APIs consistent with existing components.
-- Validate changes with `flutter analyze`.
-
-## License
-
-See `LICENSE`.
+## How was this done?
+Pretty much vibe-coded with Codex and GPT-5. 😅
