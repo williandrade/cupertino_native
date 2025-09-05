@@ -202,6 +202,10 @@ class CupertinoButtonPlatformView: NSObject, FlutterPlatformView {
 
   private func applyButtonStyle(buttonStyle: String, round: Bool) {
     if #available(iOS 15.0, *) {
+      // Preserve current content while swapping configurations
+      let currentTitle = button.configuration?.title
+      let currentImage = button.configuration?.image
+      let currentSymbolCfg = button.configuration?.preferredSymbolConfigurationForImage
       var config: UIButton.Configuration
       switch buttonStyle {
       case "plain": config = .plain()
@@ -239,6 +243,10 @@ class CupertinoButtonPlatformView: NSObject, FlutterPlatformView {
           break
         }
       }
+      // Restore content after style swap
+      config.title = currentTitle
+      config.image = currentImage
+      config.preferredSymbolConfigurationForImage = currentSymbolCfg
       button.configuration = config
     } else {
       button.layer.cornerRadius = round ? 999 : 8
