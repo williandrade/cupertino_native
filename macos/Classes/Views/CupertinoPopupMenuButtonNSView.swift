@@ -4,7 +4,7 @@ import Cocoa
 class CupertinoPopupMenuButtonNSView: NSView {
   private let channel: FlutterMethodChannel
   private let button: NSButton
-  private var menu: NSMenu = NSMenu()
+  private var popupMenu: NSMenu = NSMenu()
   private var labels: [String] = []
   private var symbols: [String] = []
   private var dividers: [Bool] = []
@@ -98,7 +98,9 @@ class CupertinoPopupMenuButtonNSView: NSView {
     }
     // Map CNButtonStyle to AppKit bezel styles (best-effort)
     switch buttonStyle {
-    case "plain": button.bezelStyle = .borderless
+    case "plain":
+      button.bezelStyle = .texturedRounded
+      button.isBordered = false
     case "gray": button.bezelStyle = .texturedRounded
     case "tinted": button.bezelStyle = .texturedRounded
     case "bordered": button.bezelStyle = .rounded
@@ -172,7 +174,9 @@ class CupertinoPopupMenuButtonNSView: NSView {
           }
           if let bs = args["buttonStyle"] as? String {
             switch bs {
-            case "plain": self.button.bezelStyle = .borderless
+            case "plain":
+              self.button.bezelStyle = .texturedRounded
+              self.button.isBordered = false
             case "gray": self.button.bezelStyle = .texturedRounded
             case "tinted": self.button.bezelStyle = .texturedRounded
             case "bordered": self.button.bezelStyle = .rounded
@@ -182,6 +186,7 @@ class CupertinoPopupMenuButtonNSView: NSView {
             case "prominentGlass": self.button.bezelStyle = .texturedRounded
             default: self.button.bezelStyle = .rounded
             }
+            if bs != "plain" { self.button.isBordered = true }
           }
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
@@ -247,15 +252,15 @@ class CupertinoPopupMenuButtonNSView: NSView {
 
   @objc private func onButtonPressed(_ sender: NSButton) {
     let location = NSPoint(x: 0, y: sender.bounds.height)
-    menu.popUp(positioning: nil, at: location, in: sender)
+    popupMenu.popUp(positioning: nil, at: location, in: sender)
   }
 
   private func rebuildMenu(defaultSizes: [NSNumber]? = nil, defaultColors: [NSNumber]? = nil) {
-    menu = NSMenu()
+    popupMenu = NSMenu()
     let count = max(labels.count, max(symbols.count, dividers.count))
     for i in 0..<count {
       if i < dividers.count, dividers[i] {
-        menu.addItem(.separator())
+        popupMenu.addItem(.separator())
         continue
       }
       let title = i < labels.count ? labels[i] : ""
@@ -305,7 +310,7 @@ class CupertinoPopupMenuButtonNSView: NSView {
           mi.image = img
         }
       }
-      menu.addItem(mi)
+      popupMenu.addItem(mi)
     }
   }
 
@@ -319,5 +324,18 @@ class CupertinoPopupMenuButtonNSView: NSView {
     let g = CGFloat((argb >> 8) & 0xFF) / 255.0
     let b = CGFloat(argb & 0xFF) / 255.0
     return NSColor(srgbRed: r, green: g, blue: b, alpha: a)
+  }
+}
+
+private extension NSImage {
+  func tinted(with color: NSColor) -> NSImage {
+    let img = NSImage(size: size)
+    img.lockFocus()
+    let rect = NSRect(origin: .zero, size: size)
+    color.set()
+    rect.fill()
+    draw(in: rect, from: .zero, operation: .destinationIn, fraction: 1.0)
+    img.unlockFocus()
+    return img
   }
 }

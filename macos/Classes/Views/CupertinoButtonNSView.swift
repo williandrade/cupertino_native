@@ -77,7 +77,9 @@ class CupertinoButtonNSView: NSView {
     }
     // Map button styles best-effort to AppKit
     switch buttonStyle {
-    case "plain": button.bezelStyle = .borderless
+    case "plain":
+      button.bezelStyle = .texturedRounded
+      button.isBordered = false
     case "gray": button.bezelStyle = .texturedRounded
     case "tinted": button.bezelStyle = .texturedRounded
     case "bordered": button.bezelStyle = .rounded
@@ -133,7 +135,9 @@ class CupertinoButtonNSView: NSView {
           if let bs = args["buttonStyle"] as? String {
             self.currentButtonStyle = bs
             switch bs {
-            case "plain": self.button.bezelStyle = .borderless
+            case "plain":
+              self.button.bezelStyle = .texturedRounded
+              self.button.isBordered = false
             case "gray": self.button.bezelStyle = .texturedRounded
             case "tinted": self.button.bezelStyle = .texturedRounded
             case "bordered": self.button.bezelStyle = .rounded
@@ -143,6 +147,7 @@ class CupertinoButtonNSView: NSView {
             case "prominentGlass": self.button.bezelStyle = .texturedRounded
             default: self.button.bezelStyle = .rounded
             }
+            if bs != "plain" { self.button.isBordered = true }
             if #available(macOS 10.14, *), let c = self.button.contentTintColor, ["filled", "borderedProminent"].contains(self.currentButtonStyle) {
               self.button.bezelColor = c
             }
