@@ -101,6 +101,14 @@ class CupertinoIconPlatformView: NSObject, FlutterPlatformView {
 
     if let mode = renderingMode {
       switch mode {
+      case "monochrome":
+        if #available(iOS 13.0, *) {
+          if let c = color {
+            image = image.withTintColor(c, renderingMode: .alwaysOriginal)
+          } else {
+            image = image.withTintColor(.black, renderingMode: .alwaysOriginal)
+          }
+        }
       case "hierarchical":
         if #available(iOS 15.0, *), let c = color {
           let cfg = UIImage.SymbolConfiguration(hierarchicalColor: c)
@@ -123,6 +131,11 @@ class CupertinoIconPlatformView: NSObject, FlutterPlatformView {
       if #available(iOS 13.0, *) {
         image = image.withTintColor(c, renderingMode: .alwaysOriginal)
       }
+    } else {
+      // Default to black instead of system tint blue when no color/mode provided
+      if #available(iOS 13.0, *) {
+        image = image.withTintColor(.black, renderingMode: .alwaysOriginal)
+      }
     }
 
     if gradientEnabled {
@@ -141,4 +154,3 @@ class CupertinoIconPlatformView: NSObject, FlutterPlatformView {
     return UIColor(red: r, green: g, blue: b, alpha: a)
   }
 }
-

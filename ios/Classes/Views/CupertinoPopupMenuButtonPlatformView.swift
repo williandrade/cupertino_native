@@ -105,7 +105,13 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
     // Apply content initially
     setButtonContent(title: title, image: makeButtonIconImage(), iconOnly: (title == nil))
     if #available(iOS 15.0, *), var cfg = button.configuration {
-      cfg.preferredSymbolConfigurationForImage = makeButtonSymbolConfiguration()
+      // Prefer explicit icon mode/color if provided
+      if let symCfg = makeButtonSymbolConfiguration() {
+        cfg.preferredSymbolConfigurationForImage = symCfg
+      } else if let t = tint, btnIconColor == nil, btnIconMode == nil {
+        // Fallback: color the symbol using current button tint if no explicit color/mode
+        cfg.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(hierarchicalColor: t)
+      }
       button.configuration = cfg
     }
 
@@ -179,7 +185,11 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
           if let pal = args["buttonIconPaletteColors"] as? [NSNumber] { self.btnIconPalette = pal.map { Self.colorFromARGB($0.intValue) } }
           self.setButtonContent(title: nil, image: self.makeButtonIconImage(), iconOnly: true)
           if #available(iOS 15.0, *), var cfg = self.button.configuration {
-            cfg.preferredSymbolConfigurationForImage = self.makeButtonSymbolConfiguration()
+            if let symCfg = self.makeButtonSymbolConfiguration() {
+              cfg.preferredSymbolConfigurationForImage = symCfg
+            } else if self.btnIconColor == nil, self.btnIconMode == nil, let tint = self.button.tintColor {
+              cfg.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(hierarchicalColor: tint)
+            }
             self.button.configuration = cfg
           }
           result(nil)

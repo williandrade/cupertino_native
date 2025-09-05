@@ -100,6 +100,12 @@ class CupertinoIconNSView: NSView {
 
     if let mode = renderingMode {
       switch mode {
+      case "monochrome":
+        if let c = color {
+          image = image.tinted(with: c)
+        } else {
+          image = image.tinted(with: .black)
+        }
       case "hierarchical":
         if #available(macOS 12.0, *), let c = color {
           let cfg = NSImage.SymbolConfiguration(hierarchicalColor: c)
@@ -118,6 +124,9 @@ class CupertinoIconNSView: NSView {
       }
     } else if let c = color {
       image = image.tinted(with: c)
+    } else {
+      // Default to black instead of system tint when no color/mode provided
+      image = image.tinted(with: .black)
     }
 
     // Gradient toggle is no-op until supported natively on macOS
