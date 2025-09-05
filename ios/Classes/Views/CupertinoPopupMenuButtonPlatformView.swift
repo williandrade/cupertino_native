@@ -242,24 +242,18 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
     if #available(iOS 15.0, *) {
       var config: UIButton.Configuration
       switch buttonStyle {
-      case "automatic": config = .plain()
-      case "accessoryBar": config = .gray()
-      case "accessoryBarAction": config = .tinted()
+      case "plain": config = .plain()
+      case "gray": config = .gray()
+      case "tinted": config = .tinted()
       case "bordered": config = .bordered()
       case "borderedProminent": config = .borderedProminent()
+      case "filled": config = .filled()
       case "glass":
+        if #available(iOS 26.0, *) { config = .glass() } else { config = .tinted() }
+      case "prominentGlass":
+        if #available(iOS 26.0, *) { config = .prominentGlass() } else { config = .tinted() }
+      default:
         config = .plain()
-        var bg = UIBackgroundConfiguration.clear()
-        bg.visualEffect = UIBlurEffect(style: .systemChromeMaterial)
-        bg.cornerRadius = round ? 999 : 12
-        bg.strokeColor = UIColor.separator.withAlphaComponent(0.45)
-        bg.strokeWidth = 1.0 / UIScreen.main.scale
-        config.background = bg
-      case "borderless": config = .plain()
-      case "card": config = .plain()
-      case "link": config = .plain()
-      case "plain": config = .plain()
-      default: config = .plain()
       }
       config.cornerStyle = round ? .capsule : .dynamic
       button.configuration = config

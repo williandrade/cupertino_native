@@ -47,14 +47,16 @@ class CupertinoButtonNSView: NSView {
       button.image = image
       button.imagePosition = .imageOnly
     }
-    // Map button styles best-effort
+    // Map button styles best-effort to AppKit
     switch buttonStyle {
-    case "automatic": button.bezelStyle = .rounded
-    case "accessoryBar", "accessoryBarAction": button.bezelStyle = .texturedRounded
+    case "plain": button.bezelStyle = .borderless
+    case "gray": button.bezelStyle = .texturedRounded
+    case "tinted": button.bezelStyle = .texturedRounded
     case "bordered": button.bezelStyle = .rounded
     case "borderedProminent": button.bezelStyle = .rounded
+    case "filled": button.bezelStyle = .rounded
     case "glass": button.bezelStyle = .texturedRounded
-    case "borderless", "card", "link", "plain": button.bezelStyle = .borderless
+    case "prominentGlass": button.bezelStyle = .texturedRounded
     default: button.bezelStyle = .rounded
     }
     if makeRound { button.bezelStyle = .circular }
@@ -86,12 +88,14 @@ class CupertinoButtonNSView: NSView {
           if #available(macOS 10.14, *), let n = args["tint"] as? NSNumber { self.button.contentTintColor = Self.colorFromARGB(n.intValue) }
           if let bs = args["buttonStyle"] as? String {
             switch bs {
-            case "automatic": self.button.bezelStyle = .rounded
-            case "accessoryBar", "accessoryBarAction": self.button.bezelStyle = .texturedRounded
+            case "plain": self.button.bezelStyle = .borderless
+            case "gray": self.button.bezelStyle = .texturedRounded
+            case "tinted": self.button.bezelStyle = .texturedRounded
             case "bordered": self.button.bezelStyle = .rounded
             case "borderedProminent": self.button.bezelStyle = .rounded
+            case "filled": self.button.bezelStyle = .rounded
             case "glass": self.button.bezelStyle = .texturedRounded
-            case "borderless", "card", "link", "plain": self.button.bezelStyle = .borderless
+            case "prominentGlass": self.button.bezelStyle = .texturedRounded
             default: self.button.bezelStyle = .rounded
             }
           }

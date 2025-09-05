@@ -33,7 +33,7 @@ class CNPopupMenuButton extends StatefulWidget {
     this.tint,
     this.height = 32.0,
     this.shrinkWrap = false,
-    this.buttonStyle = CNButtonStyle.automatic,
+    this.buttonStyle = CNButtonStyle.plain,
   }) : buttonIcon = null,
        width = null,
        round = false;

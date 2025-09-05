@@ -50,7 +50,7 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
                   onSelected: (index) {
                     setState(() => _lastSelected = index);
                   },
-                  buttonStyle: CNButtonStyle.automatic,
+                  buttonStyle: CNButtonStyle.plain,
                 ),
               ],
             ),

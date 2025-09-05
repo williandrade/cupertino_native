@@ -1,13 +1,10 @@
 enum CNButtonStyle {
-  automatic,
-  accessoryBar,
-  accessoryBarAction,
+  plain,
+  gray,
+  tinted,
   bordered,
   borderedProminent,
-  borderless,
-  glass,
-  card,
-  link,
-  plain,
+  filled,
+  glass, // iOS 26+
+  prominentGlass, // iOS 26+
 }
-

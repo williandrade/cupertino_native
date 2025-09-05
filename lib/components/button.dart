@@ -16,7 +16,7 @@ class CNButton extends StatefulWidget {
     this.tint,
     this.height = 32.0,
     this.shrinkWrap = false,
-    this.style = CNButtonStyle.automatic,
+    this.style = CNButtonStyle.plain,
   })  : icon = null,
         width = null,
         round = false;

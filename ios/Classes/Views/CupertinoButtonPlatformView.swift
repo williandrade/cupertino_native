@@ -138,22 +138,26 @@ class CupertinoButtonPlatformView: NSObject, FlutterPlatformView {
     if #available(iOS 15.0, *) {
       var config: UIButton.Configuration
       switch buttonStyle {
-      case "automatic": config = .plain()
-      case "accessoryBar":
-        config = .gray()
-      case "accessoryBarAction": config = .tinted()
+      case "plain": config = .plain()
+      case "gray": config = .gray()
+      case "tinted": config = .tinted()
       case "bordered": config = .bordered()
       case "borderedProminent": config = .borderedProminent()
+      case "filled": config = .filled()
       case "glass":
-        config = .plain()
-        if #available(iOS 26, *) {
+        if #available(iOS 26.0, *) {
           config = .glass()
+        } else {
+          config = .tinted()
         }
-      case "borderless": config = .plain()
-      case "card": config = .plain()
-      case "link": config = .plain()
-      case "plain": config = .plain()
-      default: config = .plain()
+      case "prominentGlass":
+        if #available(iOS 26.0, *) {
+          config = .prominentGlass()
+        } else {
+          config = .tinted()
+        }
+      default:
+        config = .plain()
       }
       config.cornerStyle = round ? .capsule : .dynamic
       button.configuration = config
