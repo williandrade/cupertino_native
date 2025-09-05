@@ -136,6 +136,11 @@ class CupertinoPopupMenuButtonPlatformView: NSObject, FlutterPlatformView {
           self.button.setTitle(t, for: .normal)
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing title", details: nil)) }
+      case "setPressed":
+        if let args = call.arguments as? [String: Any], let p = args["pressed"] as? NSNumber {
+          self.button.isHighlighted = p.boolValue
+          result(nil)
+        } else { result(FlutterError(code: "bad_args", message: "Missing pressed", details: nil)) }
       default:
         result(FlutterMethodNotImplemented)
       }

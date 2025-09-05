@@ -142,6 +142,11 @@ class CupertinoPopupMenuButtonNSView: NSView {
           self.button.title = t
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing title", details: nil)) }
+      case "setPressed":
+        if let args = call.arguments as? [String: Any], let p = args["pressed"] as? NSNumber {
+          self.alphaValue = p.boolValue ? 0.7 : 1.0
+          result(nil)
+        } else { result(FlutterError(code: "bad_args", message: "Missing pressed", details: nil)) }
       default:
         result(FlutterMethodNotImplemented)
       }

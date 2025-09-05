@@ -139,19 +139,16 @@ class CupertinoButtonPlatformView: NSObject, FlutterPlatformView {
       var config: UIButton.Configuration
       switch buttonStyle {
       case "automatic": config = .plain()
-      case "accessoryBar": config = .gray()
+      case "accessoryBar":
+        config = .gray()
       case "accessoryBarAction": config = .tinted()
       case "bordered": config = .bordered()
       case "borderedProminent": config = .borderedProminent()
       case "glass":
-        // Glass effect using blur + stroke; keeps content system-driven
         config = .plain()
-        var bg = UIBackgroundConfiguration.clear()
-        bg.visualEffect = UIBlurEffect(style: .systemChromeMaterial)
-        bg.cornerRadius = round ? 999 : 12
-        bg.strokeColor = UIColor.separator.withAlphaComponent(0.45)
-        bg.strokeWidth = 1.0 / UIScreen.main.scale
-        config.background = bg
+        if #available(iOS 26, *) {
+          config = .glass()
+        }
       case "borderless": config = .plain()
       case "card": config = .plain()
       case "link": config = .plain()
