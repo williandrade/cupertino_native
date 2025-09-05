@@ -1,4 +1,6 @@
-# cupertino_native
+[![Serverpod Liquid Glass Flutter banner](https://github.com/serverpod/cupertino_native/raw/main/misc/banner.jpg)](https://serverpod.dev)
+
+# Liquid Glass for Flutter
 
 Native Liquid Glass widgets for iOS and macOS in Flutter with pixel‑perfect fidelity.
 
