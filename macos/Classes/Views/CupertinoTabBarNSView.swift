@@ -14,6 +14,8 @@ class CupertinoTabBarNSView: NSView {
     var sizes: [NSNumber] = []
     var selectedIndex: Int = 0
     var isDark: Bool = false
+    var tint: NSColor? = nil
+    var bg: NSColor? = nil
 
     if let dict = args as? [String: Any] {
       labels = (dict["labels"] as? [String]) ?? []
@@ -21,6 +23,10 @@ class CupertinoTabBarNSView: NSView {
       sizes = (dict["sfSymbolSizes"] as? [NSNumber]) ?? []
       if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
+      if let style = dict["style"] as? [String: Any] {
+        if let n = style["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
+        if let n = style["backgroundColor"] as? NSNumber { bg = Self.colorFromARGB(n.intValue) }
+      }
     }
 
     super.init(frame: .zero)
@@ -31,6 +37,8 @@ class CupertinoTabBarNSView: NSView {
 
     configureSegments(labels: labels, symbols: symbols, sizes: sizes)
     if selectedIndex >= 0 { control.selectedSegment = selectedIndex }
+    if #available(macOS 10.14, *), let c = tint { control.contentTintColor = c }
+    if let b = bg { wantsLayer = true; layer?.backgroundColor = b.cgColor }
 
     control.target = self
     control.action = #selector(onChanged(_:))
@@ -56,8 +64,17 @@ class CupertinoTabBarNSView: NSView {
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing index", details: nil)) }
       case "setStyle":
-        // No-op for now
-        result(nil)
+        if let args = call.arguments as? [String: Any] {
+          if #available(macOS 10.14, *), let n = args["tint"] as? NSNumber {
+            self.control.contentTintColor = Self.colorFromARGB(n.intValue)
+          }
+          if let n = args["backgroundColor"] as? NSNumber {
+            let c = Self.colorFromARGB(n.intValue)
+            self.wantsLayer = true
+            self.layer?.backgroundColor = c.cgColor
+          }
+          result(nil)
+        } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
       case "setBrightness":
         if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
           self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)

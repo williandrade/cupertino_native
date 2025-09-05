@@ -48,6 +48,7 @@ class _CNTabBarState extends State<CNTabBar> {
   int? _lastIndex;
   int? _lastTint;
   int? _lastBg;
+  bool? _lastIsDark;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
   List<String>? _lastLabels;
@@ -58,6 +59,8 @@ class _CNTabBarState extends State<CNTabBar> {
   
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   @override
   void didUpdateWidget(covariant CNTabBar oldWidget) {
@@ -112,7 +115,7 @@ class _CNTabBarState extends State<CNTabBar> {
       'split': widget.split,
       'rightCount': widget.rightCount,
       'splitSpacing': widget.splitSpacing,
-      'style': encodeStyle(context, tint: widget.tint)
+      'style': encodeStyle(context, tint: _effectiveTint)
         ..addAll({
           if (widget.backgroundColor != null)
             'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
@@ -147,8 +150,9 @@ class _CNTabBarState extends State<CNTabBar> {
     _channel = ch;
     ch.setMethodCallHandler(_onMethodCall);
     _lastIndex = widget.currentIndex;
-    _lastTint = resolveColorToArgb(widget.tint, context);
+    _lastTint = resolveColorToArgb(_effectiveTint, context);
     _lastBg = resolveColorToArgb(widget.backgroundColor, context);
+    _lastIsDark = _isDark;
     _requestIntrinsicSize();
     _cacheItems();
     _lastSplit = widget.split;
@@ -171,8 +175,9 @@ class _CNTabBarState extends State<CNTabBar> {
   Future<void> _syncPropsToNativeIfNeeded() async {
     final ch = _channel;
     if (ch == null) return;
+    // Capture theme-dependent values before awaiting
     final idx = widget.currentIndex;
-    final tint = resolveColorToArgb(widget.tint, context);
+    final tint = resolveColorToArgb(_effectiveTint, context);
     final bg = resolveColorToArgb(widget.backgroundColor, context);
     if (_lastIndex != idx) {
       await ch.invokeMethod('setSelectedIndex', {'index': idx});
@@ -222,6 +227,23 @@ class _CNTabBarState extends State<CNTabBar> {
       _lastRightCount = widget.rightCount;
     _lastSplitSpacing = widget.splitSpacing;
       _requestIntrinsicSize();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
+    _syncPropsToNativeIfNeeded();
+  }
+
+  Future<void> _syncBrightnessIfNeeded() async {
+    final ch = _channel;
+    if (ch == null) return;
+    final isDark = _isDark;
+    if (_lastIsDark != isDark) {
+      await ch.invokeMethod('setBrightness', {'isDark': isDark});
+      _lastIsDark = isDark;
     }
   }
 
