@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:cupertino_native/components/button.dart';
+import 'package:cupertino_native/style/sf_symbol.dart';
 import 'demos/slider.dart';
 import 'demos/switch.dart';
 import 'demos/segmented_control.dart';
@@ -50,111 +52,100 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = CupertinoTheme.of(context);
+
     return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Cupertino Native'),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
+        backgroundColor: CupertinoColors.systemGroupedBackground,
+        border: null,
+        // middle: const Text('Cupertino Native'),
+        trailing: CNButton.icon(
+          icon: CNSymbol(isDarkMode ? 'sun.max.fill' : 'moon.fill', size: 18),
           onPressed: onToggleTheme,
-          child: Icon(
-            isDarkMode ? CupertinoIcons.sun_max_fill : CupertinoIcons.moon_fill,
-            size: 22,
-          ),
         ),
       ),
-      child: SafeArea(
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            CupertinoListSection.insetGrouped(
-              header: Text('Components'),
-              children: [
-                CupertinoListTile(
-                  title: Text('Slider'),
-                  trailing: CupertinoListTileChevron(),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (_) => const SliderDemoPage(),
-                      ),
-                    );
-                  },
-                ),
-                CupertinoListTile(
-                  title: Text('Switch'),
-                  trailing: CupertinoListTileChevron(),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (_) => const SwitchDemoPage(),
-                      ),
-                    );
-                  },
-                ),
-                CupertinoListTile(
-                  title: Text('Segmented Control'),
-                  trailing: CupertinoListTileChevron(),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (_) => const SegmentedControlDemoPage(),
-                      ),
-                    );
-                  },
-                ),
-                CupertinoListTile(
-                  title: Text('Icon'),
-                  trailing: CupertinoListTileChevron(),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (_) => const IconDemoPage(),
-                      ),
-                    );
-                  },
-                ),
-                CupertinoListTile(
-                  title: Text('Popup Menu Button'),
-                  trailing: CupertinoListTileChevron(),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (_) => const PopupMenuButtonDemoPage(),
-                      ),
-                    );
-                  },
-                ),
-                CupertinoListTile(
-                  title: Text('Button'),
-                  trailing: CupertinoListTileChevron(),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (_) => const ButtonDemoPage(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            CupertinoListSection.insetGrouped(
-              header: Text('Navigation'),
-              children: [
-                CupertinoListTile(
-                  title: Text('Tab Bar'),
-                  trailing: CupertinoListTileChevron(),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (_) => const TabBarDemoPage(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          CupertinoListSection.insetGrouped(
+            header: Text('Components'),
+            children: [
+              CupertinoListTile(
+                title: Text('Slider'),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => const SliderDemoPage()),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Switch'),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => const SwitchDemoPage()),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Segmented Control'),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const SegmentedControlDemoPage(),
+                    ),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Icon'),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => const IconDemoPage()),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Popup Menu Button'),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const PopupMenuButtonDemoPage(),
+                    ),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Button'),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => const ButtonDemoPage()),
+                  );
+                },
+              ),
+            ],
+          ),
+          CupertinoListSection.insetGrouped(
+            header: Text('Navigation'),
+            children: [
+              CupertinoListTile(
+                title: Text('Tab Bar'),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => const TabBarDemoPage()),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
