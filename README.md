@@ -33,6 +33,22 @@ You will also need to install the Xcode 26 beta and use `xcode-select` to set it
 sudo xcode-select -s /Applications/Xcode-beta.app
 ```
 
+## What's in the package
+
+### Slider
+
+![Liquid Glass Slider](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshot/slider.jpg)
+
+```dart
+CNSlider(
+  value: _defaultSliderValue,
+  min: 0,
+  max: 100,
+  enabled: true,
+  onChanged: (v) => setState(() => _value_ = v),
+)
+```
+
 ## What's left to do?
 So far, this is more of a proof of concept than a full package (although the included components do work). Future improvements include:
 
