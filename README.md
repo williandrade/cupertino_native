@@ -37,7 +37,7 @@ sudo xcode-select -s /Applications/Xcode-beta.app
 
 ### Slider
 
-![Liquid Glass Slider](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshot/slider.jpg)
+![Liquid Glass Slider](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/slider.png)
 
 ```dart
 CNSlider(
