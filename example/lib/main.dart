@@ -94,7 +94,7 @@ class HomePage extends StatelessWidget {
               buttonIcon: CNSymbol(
                 'paintpalette.fill',
                 size: 18,
-                mode: CNSFSymbolRenderingMode.multicolor,
+                mode: CNSymbolRenderingMode.multicolor,
               ),
               tint: accentColor,
               items: [
@@ -151,8 +151,7 @@ class HomePage extends StatelessWidget {
               CupertinoListTile(
                 title: Text('Segmented Control'),
                 leading: CNIcon(
-                  symbol:
-                      CNSymbol('rectangle.split.3x1', color: accentColor),
+                  symbol: CNSymbol('rectangle.split.3x1', color: accentColor),
                 ),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
@@ -165,9 +164,7 @@ class HomePage extends StatelessWidget {
               ),
               CupertinoListTile(
                 title: Text('Icon'),
-                leading: CNIcon(
-                  symbol: CNSymbol('app', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('app', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(

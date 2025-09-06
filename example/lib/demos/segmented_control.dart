@@ -14,10 +14,6 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
   int _index2 = 1;
   int _index3 = 0;
   int _index4 = 0;
-  int _index5 = 0;
-  int _index6 = 0;
-  int _index7 = 0;
-  int _index8 = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -29,151 +25,80 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           children: [
-            const Text('Basic'),
-            Center(
-              child: CNSegmentedControl(
-                labels: const ['One', 'Two', 'Three'],
-                selectedIndex: _index1,
-                onValueChanged: (i) => setState(() => _index1 = i),
-              ),
+            Row(
+              children: [
+                Text('Basic'),
+                Spacer(),
+                Text('Selected: ${_index1 + 1}'),
+              ],
             ),
-            Text('Selected: ${_index1 + 1}'),
-            const SizedBox(height: 24),
-            const Text('Tinted (systemPink) + shrinkWrap'),
-            Center(
-              child: CNSegmentedControl(
-                labels: const ['A', 'B', 'C'],
-                selectedIndex: _index2,
-                tint: CupertinoColors.systemPink,
-                shrinkWrap: true,
-                onValueChanged: (i) => setState(() => _index2 = i),
-              ),
+            const SizedBox(height: 12),
+            CNSegmentedControl(
+              labels: const ['One', 'Two', 'Three'],
+              selectedIndex: _index1,
+              onValueChanged: (i) => setState(() => _index1 = i),
             ),
-            Text('Selected: ${_index2 + 1}'),
-            const SizedBox(height: 24),
-            const Text('SF Symbols (heart.fill / star.fill / bell.fill) with size 20'),
+
+            const SizedBox(height: 48),
+
+            Row(
+              children: [
+                Text('Colored'),
+                Spacer(),
+                Text('Selected: ${_index3 + 1}'),
+              ],
+            ),
+            const SizedBox(height: 12),
+            CNSegmentedControl(
+              labels: const ['One', 'Two', 'Three'],
+              selectedIndex: _index3,
+              color: CupertinoColors.systemPink,
+              onValueChanged: (i) => setState(() => _index3 = i),
+            ),
+
+            const SizedBox(height: 48),
+
+            Row(
+              children: [
+                Text('Shrink wrap'),
+                Spacer(),
+                Text('Selected: ${_index2 + 1}'),
+              ],
+            ),
+            const SizedBox(height: 12),
+            CNSegmentedControl(
+              labels: const ['One', 'Two', 'Three'],
+              selectedIndex: _index2,
+              onValueChanged: (i) => setState(() => _index2 = i),
+              shrinkWrap: true,
+            ),
+
+            const SizedBox(height: 48),
+
+            Row(
+              children: [
+                Text('Icons'),
+                Spacer(),
+                Text('Selected: ${_index4 + 1}'),
+              ],
+            ),
+            const SizedBox(height: 12),
             Center(
               child: CNSegmentedControl(
                 labels: const [],
                 sfSymbols: const [
-                  CNSymbol('heart.fill'),
-                  CNSymbol('star.fill'),
-                  CNSymbol('bell.fill'),
-                ],
-                selectedIndex: _index3,
-                iconSize: 20,
-                shrinkWrap: true,
-                onValueChanged: (i) => setState(() => _index3 = i),
-              ),
-            ),
-            Text('Selected: ${_index3 + 1}'),
-            const SizedBox(height: 24),
-            const Text('SF Symbols with per-icon size and color'),
-            Center(
-              child: CNSegmentedControl(
-                labels: const [],
-                sfSymbols: const [
-                  CNSymbol('heart.fill', size: 22, color: CupertinoColors.systemPink),
-                  CNSymbol('star.fill', size: 18, color: CupertinoColors.systemYellow),
-                  CNSymbol('bell.fill', size: 26, color: CupertinoColors.systemBlue),
+                  CNSymbol('list.clipboard'),
+                  CNSymbol('leaf.arrow.trianglehead.clockwise'),
+                  CNSymbol('figure.walk.diamond'),
                 ],
                 selectedIndex: _index4,
+                iconColor: CupertinoColors.systemBlue,
+                iconRenderingMode: CNSymbolRenderingMode.hierarchical,
                 shrinkWrap: true,
                 onValueChanged: (i) => setState(() => _index4 = i),
+                height: 48,
               ),
             ),
-            Text('Selected: ${_index4 + 1}'),
-            const SizedBox(height: 24),
-            const Text('SF Symbols gradient toggle (future built-in, ignored on older OS)'),
-            Center(
-              child: CNSegmentedControl(
-                labels: const [],
-                sfSymbols: const [
-                  CNSymbol('heart.fill', gradient: true),
-                  CNSymbol('star.fill', gradient: true),
-                  CNSymbol('bell.fill', gradient: true),
-                ],
-                selectedIndex: _index1,
-                iconColor: CupertinoColors.systemPink,
-                shrinkWrap: true,
-                onValueChanged: (i) => setState(() => _index1 = i),
-              ),
-            ),
-            Text('Selected: ${_index1 + 1}'),
-            const SizedBox(height: 24),
-            const Text('Rendering modes: Monochrome (pink)'),
-            Center(
-              child: CNSegmentedControl(
-                labels: const [],
-                sfSymbols: const [
-                  CNSymbol('heart.fill', mode: CNSFSymbolRenderingMode.monochrome),
-                  CNSymbol('star.fill', mode: CNSFSymbolRenderingMode.monochrome),
-                  CNSymbol('bell.fill', mode: CNSFSymbolRenderingMode.monochrome),
-                ],
-                selectedIndex: _index5,
-                iconRenderingMode: CNSFSymbolRenderingMode.monochrome,
-                iconColor: CupertinoColors.systemPink,
-                shrinkWrap: true,
-                onValueChanged: (i) => setState(() => _index5 = i),
-              ),
-            ),
-            Text('Selected: ${_index5 + 1}'),
-            const SizedBox(height: 24),
-            const Text('Rendering modes: Hierarchical (blue)'),
-            Center(
-              child: CNSegmentedControl(
-                labels: const [],
-                sfSymbols: const [
-                  CNSymbol('heart.fill', mode: CNSFSymbolRenderingMode.hierarchical),
-                  CNSymbol('star.fill', mode: CNSFSymbolRenderingMode.hierarchical),
-                  CNSymbol('bell.fill', mode: CNSFSymbolRenderingMode.hierarchical),
-                ],
-                selectedIndex: _index6,
-                iconRenderingMode: CNSFSymbolRenderingMode.hierarchical,
-                iconColor: CupertinoColors.systemBlue,
-                shrinkWrap: true,
-                onValueChanged: (i) => setState(() => _index6 = i),
-              ),
-            ),
-            Text('Selected: ${_index6 + 1}'),
-            const SizedBox(height: 24),
-            const Text('Rendering modes: Palette (yellow/orange)'),
-            Center(
-              child: CNSegmentedControl(
-                labels: const [],
-                sfSymbols: const [
-                  CNSymbol('heart.fill', mode: CNSFSymbolRenderingMode.palette),
-                  CNSymbol('star.fill', mode: CNSFSymbolRenderingMode.palette),
-                  CNSymbol('bell.fill', mode: CNSFSymbolRenderingMode.palette),
-                ],
-                selectedIndex: _index7,
-                iconRenderingMode: CNSFSymbolRenderingMode.palette,
-                iconPaletteColors: const [
-                  CupertinoColors.systemYellow,
-                  CupertinoColors.systemOrange,
-                ],
-                shrinkWrap: true,
-                onValueChanged: (i) => setState(() => _index7 = i),
-              ),
-            ),
-            Text('Selected: ${_index7 + 1}'),
-            const SizedBox(height: 24),
-            const Text('Rendering modes: Multicolor'),
-            Center(
-              child: CNSegmentedControl(
-                labels: const [],
-                sfSymbols: const [
-                  CNSymbol('heart.fill', mode: CNSFSymbolRenderingMode.multicolor),
-                  CNSymbol('star.fill', mode: CNSFSymbolRenderingMode.multicolor),
-                  CNSymbol('bell.fill', mode: CNSFSymbolRenderingMode.multicolor),
-                ],
-                selectedIndex: _index8,
-                iconRenderingMode: CNSFSymbolRenderingMode.multicolor,
-                shrinkWrap: true,
-                onValueChanged: (i) => setState(() => _index8 = i),
-              ),
-            ),
-            Text('Selected: ${_index8 + 1}'),
           ],
         ),
       ),

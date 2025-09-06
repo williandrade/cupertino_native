@@ -12,7 +12,7 @@ class CNSegmentedControl extends StatefulWidget {
     required this.selectedIndex,
     required this.onValueChanged,
     this.enabled = true,
-    this.tint,
+    this.color,
     this.height = 32.0,
     this.shrinkWrap = false,
     this.sfSymbols,
@@ -27,7 +27,7 @@ class CNSegmentedControl extends StatefulWidget {
   final int selectedIndex;
   final ValueChanged<int> onValueChanged;
   final bool enabled;
-  final Color? tint;
+  final Color? color;
   final double height;
   final bool shrinkWrap;
   final List<CNSymbol>? sfSymbols;
@@ -35,7 +35,7 @@ class CNSegmentedControl extends StatefulWidget {
   final Color? iconColor;
   final List<Color>? iconPaletteColors;
   final bool? iconGradientEnabled;
-  final CNSFSymbolRenderingMode? iconRenderingMode;
+  final CNSymbolRenderingMode? iconRenderingMode;
 
   @override
   State<CNSegmentedControl> createState() => _CNSegmentedControlState();
@@ -78,10 +78,13 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
         height: widget.height,
         child: CupertinoSegmentedControl<int>(
           children: {
-            for (var i = 0; i < widget.labels.length; i++) i: Text(widget.labels[i])
+            for (var i = 0; i < widget.labels.length; i++)
+              i: Text(widget.labels[i]),
           },
           groupValue: widget.selectedIndex,
-          onValueChanged: widget.enabled ? (i) => widget.onValueChanged(i) : (_) {},
+          onValueChanged: widget.enabled
+              ? (i) => widget.onValueChanged(i)
+              : (_) {},
         ),
       );
     }
@@ -92,10 +95,11 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
       'selectedIndex': widget.selectedIndex,
       'enabled': widget.enabled,
       'isDark': _isDark,
-      'style': encodeStyle(context, tint: widget.tint)
+      'style': encodeStyle(context, tint: widget.color)
         ..addAll({
           if (widget.iconSize != null) 'iconSize': widget.iconSize,
-          if (widget.iconColor != null) 'iconColor': resolveColorToArgb(widget.iconColor, context),
+          if (widget.iconColor != null)
+            'iconColor': resolveColorToArgb(widget.iconColor, context),
           if (widget.iconPaletteColors != null)
             'iconPaletteColors': widget.iconPaletteColors!
                 .map((c) => resolveColorToArgb(c, context))
@@ -115,9 +119,11 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
             .toList(),
       if (widget.sfSymbols != null)
         'sfSymbolPaletteColors': widget.sfSymbols!
-            .map((e) => (e.paletteColors ?? [])
-                .map((c) => resolveColorToArgb(c, context))
-                .toList())
+            .map(
+              (e) => (e.paletteColors ?? [])
+                  .map((c) => resolveColorToArgb(c, context))
+                  .toList(),
+            )
             .toList(),
       if (widget.sfSymbols != null)
         'sfSymbolRenderingModes': widget.sfSymbols!
@@ -185,21 +191,23 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
     _lastSelected = widget.selectedIndex;
     _lastEnabled = widget.enabled;
     _lastIsDark = _isDark;
-    _lastTint = resolveColorToArgb(widget.tint, context);
+    _lastTint = resolveColorToArgb(widget.color, context);
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
 
-    final tint = resolveColorToArgb(widget.tint, context);
+    final tint = resolveColorToArgb(widget.color, context);
 
     if (_lastEnabled != widget.enabled) {
       await channel.invokeMethod('setEnabled', {'enabled': widget.enabled});
       _lastEnabled = widget.enabled;
     }
     if (_lastSelected != widget.selectedIndex) {
-      await channel.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
+      await channel.invokeMethod('setSelectedIndex', {
+        'index': widget.selectedIndex,
+      });
       _lastSelected = widget.selectedIndex;
     }
     if (_lastTint != tint && tint != null) {
@@ -224,7 +232,7 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
     final channel = _channel;
     if (channel == null) return;
     final isDark = _isDark;
-    final tint = resolveColorToArgb(widget.tint, context);
+    final tint = resolveColorToArgb(widget.color, context);
     if (_lastIsDark != isDark) {
       await channel.invokeMethod('setBrightness', {'isDark': isDark});
       _lastIsDark = isDark;

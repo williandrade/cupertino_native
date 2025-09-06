@@ -19,7 +19,7 @@ class CNIcon extends StatefulWidget {
   final CNSymbol symbol;
   final double? size;
   final Color? color;
-  final CNSFSymbolRenderingMode? mode;
+  final CNSymbolRenderingMode? mode;
   final bool? gradient;
   final double? height;
 
@@ -68,15 +68,18 @@ class _CNIconState extends State<CNIcon> {
       'style': <String, dynamic>{
         'iconSize': (widget.size ?? symbol.size),
         if ((widget.color ?? symbol.color) != null)
-          'iconColor': resolveColorToArgb(widget.color ?? symbol.color, context),
+          'iconColor': resolveColorToArgb(
+            widget.color ?? symbol.color,
+            context,
+          ),
         if ((widget.mode ?? symbol.mode) != null)
           'iconRenderingMode': (widget.mode ?? symbol.mode)!.name,
         if ((widget.gradient ?? symbol.gradient) != null)
           'iconGradientEnabled': (widget.gradient ?? symbol.gradient) == true,
-      if (symbol.paletteColors != null)
-        'iconPaletteColors': symbol.paletteColors!
-            .map((c) => resolveColorToArgb(c, context))
-            .toList(),
+        if (symbol.paletteColors != null)
+          'iconPaletteColors': symbol.paletteColors!
+              .map((c) => resolveColorToArgb(c, context))
+              .toList(),
       },
     };
 
@@ -117,7 +120,10 @@ class _CNIconState extends State<CNIcon> {
     _lastIsDark = _isDark;
     _lastName = widget.symbol.name;
     _lastSize = widget.size ?? widget.symbol.size;
-    _lastColor = resolveColorToArgb(widget.color ?? widget.symbol.color, context);
+    _lastColor = resolveColorToArgb(
+      widget.color ?? widget.symbol.color,
+      context,
+    );
     _lastMode = (widget.mode ?? widget.symbol.mode)?.name;
     _lastGradient = widget.gradient ?? widget.symbol.gradient;
   }
@@ -129,7 +135,10 @@ class _CNIconState extends State<CNIcon> {
     // Resolve before any awaits
     final name = widget.symbol.name;
     final size = widget.size ?? widget.symbol.size;
-    final color = resolveColorToArgb(widget.color ?? widget.symbol.color, context);
+    final color = resolveColorToArgb(
+      widget.color ?? widget.symbol.color,
+      context,
+    );
     final mode = (widget.mode ?? widget.symbol.mode)?.name;
     final gradient = widget.gradient ?? widget.symbol.gradient;
 
