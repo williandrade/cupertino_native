@@ -1,16 +1,18 @@
-# cupertino_native_example
+# Cupertino Native Example
 
-Demonstrates how to use the cupertino_native plugin.
+This is the demo app for the Cupertino Native package. It showcases all supported Liquid Glass widgets.
 
-## Getting Started
+## Running the app
 
-This project is a starting point for a Flutter application.
+This app only shows the Liquid Glass components when running on iOS 26 or later. You must also build it with Xcode 26 or later. To activate the Xcode 26 beta, run the following command (provided it is installed in your Applications directory).
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+sudo xcode-select -s /Applications/Xcode-beta.app
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Then run it like any other Flutter app. It works on both the iOS Simulator and real devices.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+cd example
+flutter run
+```
