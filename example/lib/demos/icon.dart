@@ -12,77 +12,109 @@ class IconDemoPage extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text('Basic icons'),
+            const Text('Basic'),
+            SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const [
-                CNIcon(symbol: CNSymbol('heart.fill'), size: 24),
-                CNIcon(symbol: CNSymbol('star.fill'), size: 24),
-                CNIcon(symbol: CNSymbol('bell.fill'), size: 24),
+                CNIcon(symbol: CNSymbol('heart'), size: 24),
+                CNIcon(symbol: CNSymbol('star'), size: 24),
+                CNIcon(symbol: CNSymbol('bell'), size: 24),
+                CNIcon(symbol: CNSymbol('figure.walk'), size: 24),
+                CNIcon(symbol: CNSymbol('paperplane'), size: 24),
               ],
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 24),
+
             const Text('Sizes'),
+            SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const [
-                CNIcon(symbol: CNSymbol('heart.fill'), size: 16),
-                CNIcon(symbol: CNSymbol('heart.fill'), size: 24),
-                CNIcon(symbol: CNSymbol('heart.fill'), size: 32),
+                CNIcon(symbol: CNSymbol('heart'), size: 12),
+                CNIcon(symbol: CNSymbol('star'), size: 16),
+                CNIcon(symbol: CNSymbol('bell'), size: 24),
+                CNIcon(symbol: CNSymbol('figure.walk'), size: 32),
+                CNIcon(symbol: CNSymbol('paperplane'), size: 40),
               ],
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 24),
+
             const Text('Monochrome colors'),
+            SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const [
                 CNIcon(
                   symbol: CNSymbol('star.fill'),
-                  size: 28,
                   color: CupertinoColors.systemPink,
                   mode: CNSymbolRenderingMode.monochrome,
                 ),
                 CNIcon(
                   symbol: CNSymbol('star.fill'),
-                  size: 28,
                   color: CupertinoColors.systemBlue,
                   mode: CNSymbolRenderingMode.monochrome,
                 ),
                 CNIcon(
                   symbol: CNSymbol('star.fill'),
-                  size: 28,
                   color: CupertinoColors.systemGreen,
+                  mode: CNSymbolRenderingMode.monochrome,
+                ),
+                CNIcon(
+                  symbol: CNSymbol('star.fill'),
+                  color: CupertinoColors.systemOrange,
+                  mode: CNSymbolRenderingMode.monochrome,
+                ),
+                CNIcon(
+                  symbol: CNSymbol('star.fill'),
+                  color: CupertinoColors.systemPurple,
                   mode: CNSymbolRenderingMode.monochrome,
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             const Text('Hierarchical'),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const [
                 CNIcon(
-                  symbol: CNSymbol('folder.fill'),
-                  size: 28,
+                  symbol: CNSymbol('rectangle.and.pencil.and.ellipsis'),
+                  size: 32,
                   color: CupertinoColors.systemBlue,
                   mode: CNSymbolRenderingMode.hierarchical,
                 ),
                 CNIcon(
-                  symbol: CNSymbol('doc.fill'),
-                  size: 28,
-                  color: CupertinoColors.systemTeal,
+                  symbol: CNSymbol('person.3.sequence'),
+                  size: 32,
+                  color: CupertinoColors.systemBlue,
                   mode: CNSymbolRenderingMode.hierarchical,
                 ),
                 CNIcon(
-                  symbol: CNSymbol('paperplane.fill'),
-                  size: 28,
-                  color: CupertinoColors.systemIndigo,
+                  symbol: CNSymbol('speaker.wave.2.bubble'),
+                  size: 32,
+                  color: CupertinoColors.systemBlue,
+                  mode: CNSymbolRenderingMode.hierarchical,
+                ),
+                CNIcon(
+                  symbol: CNSymbol('ear.badge.waveform'),
+                  size: 32,
+                  color: CupertinoColors.systemBlue,
+                  mode: CNSymbolRenderingMode.hierarchical,
+                ),
+                CNIcon(
+                  symbol: CNSymbol('square.stack.3d.up'),
+                  size: 32,
+                  color: CupertinoColors.systemBlue,
                   mode: CNSymbolRenderingMode.hierarchical,
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            const Text('Multicolor (OS supported)'),
+            const SizedBox(height: 24),
+            const Text('Multicolor'),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const [
@@ -92,67 +124,24 @@ class IconDemoPage extends StatelessWidget {
                   mode: CNSymbolRenderingMode.multicolor,
                 ),
                 CNIcon(
-                  symbol: CNSymbol('aqi.low'),
+                  symbol: CNSymbol('sun.rain.fill'),
                   size: 28,
                   mode: CNSymbolRenderingMode.multicolor,
                 ),
                 CNIcon(
-                  symbol: CNSymbol('leaf.fill'),
+                  symbol: CNSymbol('rainbow'),
                   size: 28,
                   mode: CNSymbolRenderingMode.multicolor,
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text('Palette (best-effort on iOS; limited on macOS)'),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
                 CNIcon(
-                  symbol: CNSymbol(
-                    'chart.bar.fill',
-                    mode: CNSymbolRenderingMode.palette,
-                    paletteColors: [
-                      CupertinoColors.systemYellow,
-                      CupertinoColors.systemOrange,
-                    ],
-                  ),
+                  symbol: CNSymbol('pc'),
                   size: 28,
+                  mode: CNSymbolRenderingMode.multicolor,
                 ),
                 CNIcon(
-                  symbol: CNSymbol(
-                    'waveform',
-                    mode: CNSymbolRenderingMode.palette,
-                    paletteColors: [
-                      CupertinoColors.systemBlue,
-                      CupertinoColors.systemTeal,
-                    ],
-                  ),
+                  symbol: CNSymbol('lightspectrum.horizontal'),
                   size: 28,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Gradient toggle (future OS support, base color shown otherwise)',
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
-                CNIcon(
-                  symbol: CNSymbol('heart.fill', gradient: true),
-                  size: 28,
-                  color: CupertinoColors.systemPink,
-                ),
-                CNIcon(
-                  symbol: CNSymbol('star.fill', gradient: true),
-                  size: 28,
-                  color: CupertinoColors.systemYellow,
-                ),
-                CNIcon(
-                  symbol: CNSymbol('bell.fill', gradient: true),
-                  size: 28,
-                  color: CupertinoColors.systemBlue,
+                  mode: CNSymbolRenderingMode.multicolor,
                 ),
               ],
             ),
