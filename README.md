@@ -1,10 +1,12 @@
 [![Serverpod Liquid Glass Flutter banner](https://github.com/serverpod/cupertino_native/raw/main/misc/banner.jpg)](https://serverpod.dev)
 
+_This package is part of Serverpod's open-source initiative. [Serverpod](https://serverpod.dev) is the ultimate backend for Flutter - all written in Dart, free, and open-source. 👉 [Check it out](https://serverpod.dev)_
+
 # Liquid Glass for Flutter
 
 Native Liquid Glass widgets for iOS and macOS in Flutter with pixel‑perfect fidelity.
 
-This plugin hosts real UIKit/AppKit controls inside Flutter using Platform Views and method channels. It matches native look/feel while still fitting naturally into Flutter code.
+This plugin hosts real UIKit/AppKit controls inside Flutter using Platform Views and method channels. It matches native look/feel perfectly while still fitting naturally into Flutter code.
 
 Does it work and is it fast? Yes. Is it a vibe-coded Frankenstein's monster patched together with duct tape? Also yes.
 
