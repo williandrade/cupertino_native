@@ -14,7 +14,7 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final items = <CNPopupMenuEntry>[
+    final items = [
       CNPopupMenuItem(label: 'New File', icon: const CNSymbol('doc', size: 18)),
       CNPopupMenuItem(
         label: 'New Folder',
@@ -28,7 +28,7 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
       CNPopupMenuItem(
         label: 'Delete',
         icon: const CNSymbol('trash', size: 18),
-        enabled: true,
+        enabled: false,
       ),
     ];
 
@@ -43,10 +43,11 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Text('Text button'),
+                Spacer(),
                 CNPopupMenuButton(
                   buttonLabel: 'Actions',
                   items: items,
-                  shrinkWrap: true,
                   onSelected: (index) {
                     setState(() => _lastSelected = index);
                   },
@@ -54,10 +55,12 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Text('Icon button'),
+                Spacer(),
                 CNPopupMenuButton.icon(
                   buttonIcon: const CNSymbol('ellipsis', size: 18),
                   size: 44,
@@ -72,8 +75,6 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
             const SizedBox(height: 24),
             if (_lastSelected != null)
               Center(child: Text('Selected index: $_lastSelected')),
-            const SizedBox(height: 24),
-            const Text('Menu supports icons, text, and dividers.'),
           ],
         ),
       ),
