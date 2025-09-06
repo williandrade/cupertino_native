@@ -10,10 +10,10 @@ class SegmentedControlDemoPage extends StatefulWidget {
 }
 
 class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
-  int _index1 = 0;
-  int _index2 = 1;
-  int _index3 = 0;
-  int _index4 = 0;
+  int _basicSegmentedControlIndex = 0;
+  int _coloredSegmentedControlIndex = 1;
+  int _shrinkWrappedSegmentedControlIndex = 0;
+  int _iconSegmentedControlIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +29,15 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               children: [
                 Text('Basic'),
                 Spacer(),
-                Text('Selected: ${_index1 + 1}'),
+                Text('Selected: ${_basicSegmentedControlIndex + 1}'),
               ],
             ),
             const SizedBox(height: 12),
             CNSegmentedControl(
               labels: const ['One', 'Two', 'Three'],
-              selectedIndex: _index1,
-              onValueChanged: (i) => setState(() => _index1 = i),
+              selectedIndex: _basicSegmentedControlIndex,
+              onValueChanged: (i) =>
+                  setState(() => _basicSegmentedControlIndex = i),
             ),
 
             const SizedBox(height: 48),
@@ -45,15 +46,16 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               children: [
                 Text('Colored'),
                 Spacer(),
-                Text('Selected: ${_index3 + 1}'),
+                Text('Selected: ${_shrinkWrappedSegmentedControlIndex + 1}'),
               ],
             ),
             const SizedBox(height: 12),
             CNSegmentedControl(
               labels: const ['One', 'Two', 'Three'],
-              selectedIndex: _index3,
+              selectedIndex: _shrinkWrappedSegmentedControlIndex,
               color: CupertinoColors.systemPink,
-              onValueChanged: (i) => setState(() => _index3 = i),
+              onValueChanged: (i) =>
+                  setState(() => _shrinkWrappedSegmentedControlIndex = i),
             ),
 
             const SizedBox(height: 48),
@@ -62,14 +64,15 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               children: [
                 Text('Shrink wrap'),
                 Spacer(),
-                Text('Selected: ${_index2 + 1}'),
+                Text('Selected: ${_coloredSegmentedControlIndex + 1}'),
               ],
             ),
             const SizedBox(height: 12),
             CNSegmentedControl(
               labels: const ['One', 'Two', 'Three'],
-              selectedIndex: _index2,
-              onValueChanged: (i) => setState(() => _index2 = i),
+              selectedIndex: _coloredSegmentedControlIndex,
+              onValueChanged: (i) =>
+                  setState(() => _coloredSegmentedControlIndex = i),
               shrinkWrap: true,
             ),
 
@@ -79,7 +82,7 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               children: [
                 Text('Icons'),
                 Spacer(),
-                Text('Selected: ${_index4 + 1}'),
+                Text('Selected: ${_iconSegmentedControlIndex + 1}'),
               ],
             ),
             const SizedBox(height: 12),
@@ -91,11 +94,12 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                   CNSymbol('leaf.arrow.trianglehead.clockwise'),
                   CNSymbol('figure.walk.diamond'),
                 ],
-                selectedIndex: _index4,
+                selectedIndex: _iconSegmentedControlIndex,
                 iconColor: CupertinoColors.systemBlue,
                 iconRenderingMode: CNSymbolRenderingMode.hierarchical,
                 shrinkWrap: true,
-                onValueChanged: (i) => setState(() => _index4 = i),
+                onValueChanged: (i) =>
+                    setState(() => _iconSegmentedControlIndex = i),
                 height: 48,
               ),
             ),
