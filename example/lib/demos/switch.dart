@@ -9,9 +9,8 @@ class SwitchDemoPage extends StatefulWidget {
 }
 
 class _SwitchDemoPageState extends State<SwitchDemoPage> {
-  bool _value1 = true;
-  bool _value2 = false;
-  bool _pinkValue = true;
+  bool _basicSwitchValue = true;
+  bool _coloredSwitchValue = true;
 
   @override
   Widget build(BuildContext context) {
@@ -22,42 +21,35 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            const Text('Basic switch'),
-            CNSwitch(
-              value: _value1,
-              enabled: true,
-              onChanged: (v) => setState(() => _value1 = v),
+            Row(
+              children: [
+                Text('Basic ${_basicSwitchValue ? 'ON' : 'OFF'}'),
+                Spacer(),
+                CNSwitch(
+                  value: _basicSwitchValue,
+                  onChanged: (v) => setState(() => _basicSwitchValue = v),
+                ),
+              ],
             ),
-            Text('Value: ${_value1 ? 'ON' : 'OFF'}'),
-            const SizedBox(height: 24),
-            const Text('Tinted switch (systemPink)'),
-            CNSwitch(
-              value: _pinkValue,
-              enabled: true,
-              color: CupertinoColors.systemPink,
-              onChanged: (v) => setState(() => _pinkValue = v),
+            const SizedBox(height: 48),
+            Row(
+              children: [
+                Text('Colored ${_coloredSwitchValue ? 'ON' : 'OFF'}'),
+                Spacer(),
+                CNSwitch(
+                  value: _coloredSwitchValue,
+                  color: CupertinoColors.systemPink,
+                  onChanged: (v) => setState(() => _coloredSwitchValue = v),
+                ),
+              ],
             ),
-            Text('Value: ${_pinkValue ? 'ON' : 'OFF'}'),
-            const SizedBox(height: 24),
-            const Text('Centered switch'),
-            Align(
-              alignment: Alignment.center,
-              child: CNSwitch(
-                value: _value2,
-                enabled: true,
-                onChanged: (v) => setState(() => _value2 = v),
-              ),
-            ),
-            Text(
-              'Value: ${_value2 ? 'ON' : 'OFF'}',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            const Text('Disabled switch'),
-            const CNSwitch(
-              value: false,
-              enabled: false,
-              onChanged: _noop,
+            const SizedBox(height: 48),
+            Row(
+              children: [
+                Text('Disabled'),
+                Spacer(),
+                CNSwitch(value: false, enabled: false, onChanged: (_) {}),
+              ],
             ),
           ],
         ),
@@ -65,5 +57,3 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
     );
   }
 }
-
-void _noop(bool _) {}

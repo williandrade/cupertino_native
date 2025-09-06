@@ -105,6 +105,17 @@ class _CNSwitchState extends State<CNSwitch> {
     }
 
     const viewType = 'CupertinoNativeSwitch';
+    // Platform views expand to the biggest size in unconstrained axes.
+    // When placed in a Row, width can be unconstrained which would cause
+    // the platform view to try to expand to Infinity. Provide a finite
+    // width based on the native switch aspect ratio to avoid layout
+    // assertions in such cases.
+    double estimatedWidthFor(double height) {
+      // Approximate iOS UISwitch size is 51x31pt => ~1.645 aspect ratio.
+      const ratio = 51.0 / 31.0;
+      return height * ratio;
+    }
+    final double width = estimatedWidthFor(widget.height);
     final creationParams = <String, dynamic>{
       'value': widget.value,
       'enabled': widget.enabled,
@@ -115,6 +126,7 @@ class _CNSwitchState extends State<CNSwitch> {
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       return SizedBox(
         height: widget.height,
+        width: width,
         child: UiKitView(
           viewType: viewType,
           creationParamsCodec: const StandardMessageCodec(),
@@ -135,6 +147,7 @@ class _CNSwitchState extends State<CNSwitch> {
     // macOS
     return SizedBox(
       height: widget.height,
+      width: width,
       child: AppKitView(
         viewType: viewType,
         creationParamsCodec: const StandardMessageCodec(),

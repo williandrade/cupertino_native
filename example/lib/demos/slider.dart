@@ -39,7 +39,7 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
             const SizedBox(height: 48),
             Row(
               children: [
-                const Text('Same value'),
+                const Text('Shared value'),
                 Spacer(),
                 Text('Value: ${_defaultSliderValue.toStringAsFixed(1)}'),
               ],
