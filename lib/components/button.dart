@@ -17,9 +17,9 @@ class CNButton extends StatefulWidget {
     this.height = 32.0,
     this.shrinkWrap = false,
     this.style = CNButtonStyle.plain,
-  })  : icon = null,
-        width = null,
-        round = false;
+  }) : icon = null,
+       width = null,
+       round = false;
 
   const CNButton.icon({
     super.key,
@@ -29,12 +29,12 @@ class CNButton extends StatefulWidget {
     this.tint,
     double size = 44.0,
     this.style = CNButtonStyle.glass,
-  })  : label = null,
-        round = true,
-        width = size,
-        height = size,
-        shrinkWrap = false,
-        super();
+  }) : label = null,
+       round = true,
+       width = size,
+       height = size,
+       shrinkWrap = false,
+       super();
 
   final String? label; // null in icon mode
   final CNSymbol? icon; // non-null in icon mode
@@ -96,12 +96,16 @@ class _CNButtonState extends State<CNButton> {
       // Fallback Flutter implementation
       return SizedBox(
         height: widget.height,
-        width: widget.isIcon && widget.round ? (widget.width ?? widget.height) : null,
+        width: widget.isIcon && widget.round
+            ? (widget.width ?? widget.height)
+            : null,
         child: CupertinoButton(
           padding: widget.isIcon
               ? const EdgeInsets.all(4)
               : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          onPressed: (widget.enabled && widget.onPressed != null) ? widget.onPressed : null,
+          onPressed: (widget.enabled && widget.onPressed != null)
+              ? widget.onPressed
+              : null,
           child: widget.isIcon
               ? Icon(CupertinoIcons.ellipsis, size: widget.icon?.size)
               : Text(widget.label ?? ''),
@@ -185,7 +189,11 @@ class _CNButtonState extends State<CNButton> {
             _setPressed(false);
             _downPosition = null;
           },
-          child: SizedBox(height: widget.height, width: width, child: platformView),
+          child: SizedBox(
+            height: widget.height,
+            width: width,
+            child: platformView,
+          ),
         );
       },
     );
@@ -243,9 +251,7 @@ class _CNButtonState extends State<CNButton> {
       _lastTint = tint;
     }
     if (_lastStyle != widget.style) {
-      await ch.invokeMethod('setStyle', {
-        'buttonStyle': widget.style.name,
-      });
+      await ch.invokeMethod('setStyle', {'buttonStyle': widget.style.name});
       _lastStyle = widget.style;
     }
     // Enabled state

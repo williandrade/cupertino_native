@@ -115,6 +115,7 @@ class _CNSwitchState extends State<CNSwitch> {
       const ratio = 51.0 / 31.0;
       return height * ratio;
     }
+
     final double width = estimatedWidthFor(widget.height);
     final creationParams = <String, dynamic>{
       'value': widget.value,
@@ -136,9 +137,7 @@ class _CNSwitchState extends State<CNSwitch> {
             Factory<HorizontalDragGestureRecognizer>(
               () => HorizontalDragGestureRecognizer(),
             ),
-            Factory<TapGestureRecognizer>(
-              () => TapGestureRecognizer(),
-            ),
+            Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
           },
         ),
       );
@@ -157,9 +156,7 @@ class _CNSwitchState extends State<CNSwitch> {
           Factory<HorizontalDragGestureRecognizer>(
             () => HorizontalDragGestureRecognizer(),
           ),
-          Factory<TapGestureRecognizer>(
-            () => TapGestureRecognizer(),
-          ),
+          Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
         },
       ),
     );

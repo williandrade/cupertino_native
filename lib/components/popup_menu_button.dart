@@ -188,9 +188,11 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
         sizes.add(e.icon?.size);
         colors.add(resolveColorToArgb(e.icon?.color, context));
         modes.add(e.icon?.mode?.name);
-        palettes.add(e.icon?.paletteColors
-            ?.map((c) => resolveColorToArgb(c, context))
-            .toList());
+        palettes.add(
+          e.icon?.paletteColors
+              ?.map((c) => resolveColorToArgb(c, context))
+              .toList(),
+        );
         gradients.add(e.icon?.gradient);
       }
     }
@@ -361,9 +363,11 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
         updSizes.add(e.icon?.size);
         updColors.add(resolveColorToArgb(e.icon?.color, context));
         updModes.add(e.icon?.mode?.name);
-        updPalettes.add(e.icon?.paletteColors
-            ?.map((c) => resolveColorToArgb(c, context))
-            .toList());
+        updPalettes.add(
+          e.icon?.paletteColors
+              ?.map((c) => resolveColorToArgb(c, context))
+              .toList(),
+        );
         updGradients.add(e.icon?.gradient);
       }
     }

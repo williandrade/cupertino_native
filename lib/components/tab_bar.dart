@@ -56,7 +56,6 @@ class _CNTabBarState extends State<CNTabBar> {
   bool? _lastSplit;
   int? _lastRightCount;
   double? _lastSplitSpacing;
-  
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
   Color? get _effectiveTint =>
@@ -100,7 +99,9 @@ class _CNTabBarState extends State<CNTabBar> {
 
     final labels = widget.items.map((e) => e.label ?? '').toList();
     final symbols = widget.items.map((e) => e.icon?.name ?? '').toList();
-    final sizes = widget.items.map((e) => (widget.iconSize ?? e.icon?.size)).toList();
+    final sizes = widget.items
+        .map((e) => (widget.iconSize ?? e.icon?.size))
+        .toList();
     final colors = widget.items
         .map((e) => resolveColorToArgb(e.icon?.color, context))
         .toList();
@@ -118,7 +119,10 @@ class _CNTabBarState extends State<CNTabBar> {
       'style': encodeStyle(context, tint: _effectiveTint)
         ..addAll({
           if (widget.backgroundColor != null)
-            'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
+            'backgroundColor': resolveColorToArgb(
+              widget.backgroundColor,
+              context,
+            ),
         }),
     };
 
@@ -220,12 +224,12 @@ class _CNTabBarState extends State<CNTabBar> {
       await ch.invokeMethod('setLayout', {
         'split': widget.split,
         'rightCount': widget.rightCount,
-      'splitSpacing': widget.splitSpacing,
+        'splitSpacing': widget.splitSpacing,
         'selectedIndex': widget.currentIndex,
       });
       _lastSplit = widget.split;
       _lastRightCount = widget.rightCount;
-    _lastSplitSpacing = widget.splitSpacing;
+      _lastSplitSpacing = widget.splitSpacing;
       _requestIntrinsicSize();
     }
   }

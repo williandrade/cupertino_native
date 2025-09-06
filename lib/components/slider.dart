@@ -96,7 +96,9 @@ class _CNSliderState extends State<CNSlider> {
   // - Track: use explicit trackColor, otherwise widget.color, otherwise theme primaryColor.
   // - Thumb: only use explicit thumbColor; otherwise keep the native default.
   Color? get _effectiveTrackTint =>
-      widget.trackColor ?? widget.color ?? CupertinoTheme.of(context).primaryColor;
+      widget.trackColor ??
+      widget.color ??
+      CupertinoTheme.of(context).primaryColor;
   Color? get _effectiveThumbTint => widget.thumbColor;
   Color? get _effectiveTrackBgTint => widget.trackBackgroundColor;
 
@@ -169,9 +171,7 @@ class _CNSliderState extends State<CNSlider> {
             Factory<HorizontalDragGestureRecognizer>(
               () => HorizontalDragGestureRecognizer(),
             ),
-            Factory<TapGestureRecognizer>(
-              () => TapGestureRecognizer(),
-            ),
+            Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
           },
         ),
       );
@@ -192,9 +192,7 @@ class _CNSliderState extends State<CNSlider> {
           Factory<HorizontalDragGestureRecognizer>(
             () => HorizontalDragGestureRecognizer(),
           ),
-          Factory<TapGestureRecognizer>(
-            () => TapGestureRecognizer(),
-          ),
+          Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
         },
       ),
     );
@@ -258,7 +256,9 @@ class _CNSliderState extends State<CNSlider> {
       _lastEnabled = widget.enabled;
     }
 
-    final double clamped = widget.value.clamp(widget.min, widget.max).toDouble();
+    final double clamped = widget.value
+        .clamp(widget.min, widget.max)
+        .toDouble();
     if (_lastValue != clamped) {
       await channel.invokeMethod('setValue', {
         'value': clamped,
@@ -314,10 +314,24 @@ class _CNSliderState extends State<CNSlider> {
     }
 
     final styleUpdate = <String, dynamic>{};
-    if (_lastTint != tint && tint != null) { styleUpdate['tint'] = tint; _lastTint = tint; }
-    if (_lastThumbTint != thumb && thumb != null) { styleUpdate['thumbTint'] = thumb; _lastThumbTint = thumb; }
-    if (_lastTrackTint != track && track != null) { styleUpdate['trackTint'] = track; _lastTrackTint = track; }
-    if (_lastTrackBgTint != trackBg && trackBg != null) { styleUpdate['trackBackgroundTint'] = trackBg; _lastTrackBgTint = trackBg; }
-    if (styleUpdate.isNotEmpty) { await channel.invokeMethod('setStyle', styleUpdate); }
+    if (_lastTint != tint && tint != null) {
+      styleUpdate['tint'] = tint;
+      _lastTint = tint;
+    }
+    if (_lastThumbTint != thumb && thumb != null) {
+      styleUpdate['thumbTint'] = thumb;
+      _lastThumbTint = thumb;
+    }
+    if (_lastTrackTint != track && track != null) {
+      styleUpdate['trackTint'] = track;
+      _lastTrackTint = track;
+    }
+    if (_lastTrackBgTint != trackBg && trackBg != null) {
+      styleUpdate['trackBackgroundTint'] = trackBg;
+      _lastTrackBgTint = trackBg;
+    }
+    if (styleUpdate.isNotEmpty) {
+      await channel.invokeMethod('setStyle', styleUpdate);
+    }
   }
 }
