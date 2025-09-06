@@ -35,17 +35,119 @@ sudo xcode-select -s /Applications/Xcode-beta.app
 
 ## What's in the package
 
+This package ships a handful of native Liquid Glass widgets. Each widget exposes a simple, Flutter‑friendly API and falls back to a reasonable Flutter implementation on non‑Apple platforms.
+
 ### Slider
 
 ![Liquid Glass Slider](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/slider.png)
 
 ```dart
+double _value = 50;
+
 CNSlider(
-  value: _defaultSliderValue,
+  value: _value,
   min: 0,
   max: 100,
-  enabled: true,
-  onChanged: (v) => setState(() => _value_ = v),
+  onChanged: (v) => setState(() => _value = v),
+)
+```
+
+### Switch
+
+![Liquid Glass Switch](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/switch.png)
+
+```dart
+bool _on = true;
+
+CNSwitch(
+  value: _on,
+  onChanged: (v) => setState(() => _on = v),
+)
+```
+
+### Segmented Control
+
+![Liquid Glass Segmented Control](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/segmented-control.png)
+
+```dart
+int _index = 0;
+
+CNSegmentedControl(
+  labels: const ['One', 'Two', 'Three'],
+  selectedIndex: _index,
+  onValueChanged: (i) => setState(() => _index = i),
+)
+```
+
+### Button
+
+![Liquid Glass Button](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/button.png)
+
+```dart
+CNButton(
+  label: 'Press me',
+  onPressed: () {},
+)
+
+// Icon button variant
+CNButton.icon(
+  icon: const CNSymbol('heart.fill'),
+  onPressed: () {},
+)
+```
+
+### Icon (SF Symbols)
+
+![Liquid Glass Icon](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/icon.png)
+
+```dart
+// Monochrome symbol
+const CNIcon(symbol: CNSymbol('star'));
+
+// Multicolor / hierarchical options are also supported
+const CNIcon(
+  symbol: CNSymbol('paintpalette.fill'),
+  mode: CNSymbolRenderingMode.multicolor,
+)
+```
+
+### Popup Menu Button
+
+![Liquid Glass Popup Menu Button](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/popup-menu-button.png)
+
+```dart
+final items = [
+  const CNPopupMenuItem(label: 'New File', icon: CNSymbol('doc', size: 18)),
+  const CNPopupMenuItem(label: 'New Folder', icon: CNSymbol('folder', size: 18)),
+  const CNPopupMenuDivider(),
+  const CNPopupMenuItem(label: 'Rename', icon: CNSymbol('rectangle.and.pencil.and.ellipsis', size: 18)),
+];
+
+CNPopupMenuButton(
+  buttonLabel: 'Actions',
+  items: items,
+  onSelected: (index) {
+    // Handle selection
+  },
+)
+```
+
+### Tab Bar
+
+![Liquid Glass Tab Bar](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/tab-bar.png)
+
+```dart
+int _tabIndex = 0;
+
+// Overlay this at the bottom of your page
+CNTabBar(
+  items: const [
+    CNTabBarItem(label: 'Home', icon: CNSymbol('house.fill')),
+    CNTabBarItem(label: 'Profile', icon: CNSymbol('person.crop.circle')),
+    CNTabBarItem(label: 'Settings', icon: CNSymbol('gearshape.fill')),
+  ],
+  currentIndex: _tabIndex,
+  onTap: (i) => setState(() => _tabIndex = i),
 )
 ```
 
