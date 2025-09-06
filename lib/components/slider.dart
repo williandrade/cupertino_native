@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import '../channel/params.dart';
 
+/// Controller for a [CNSlider] allowing imperative changes to the native
+/// NSSlider/UISlider instance.
 class CNSliderController {
   MethodChannel? _channel;
 
@@ -16,6 +18,7 @@ class CNSliderController {
     _channel = null;
   }
 
+  /// Sets the current slider [value]. When [animated] is true, animates to it.
   Future<void> setValue(double value, {bool animated = false}) async {
     final channel = _channel;
     if (channel == null) return;
@@ -25,12 +28,14 @@ class CNSliderController {
     });
   }
 
+  /// Sets the valid [min] and [max] range of the slider.
   Future<void> setRange({required double min, required double max}) async {
     final channel = _channel;
     if (channel == null) return;
     await channel.invokeMethod('setRange', {'min': min, 'max': max});
   }
 
+  /// Enables or disables user interaction on the slider.
   Future<void> setEnabled(bool enabled) async {
     final channel = _channel;
     if (channel == null) return;
@@ -38,7 +43,12 @@ class CNSliderController {
   }
 }
 
+/// A Cupertino-native slider rendered by the host platform.
+///
+/// On iOS/macOS this embeds UISlider/NSSlider via a platform view and falls
+/// back to Flutter's [Slider] on other platforms.
 class CNSlider extends StatefulWidget {
+  /// Creates a Cupertino-native slider.
   const CNSlider({
     super.key,
     required this.value,
@@ -55,17 +65,40 @@ class CNSlider extends StatefulWidget {
     this.step,
   });
 
+  /// Current slider value.
   final double value;
+
+  /// Minimum value.
   final double min;
+
+  /// Maximum value.
   final double max;
+
+  /// Whether the control is interactive.
   final bool enabled;
+
+  /// Callback when the value changes due to user interaction.
   final ValueChanged<double> onChanged;
+
+  /// Optional controller to imperatively interact with the native view.
   final CNSliderController? controller;
+
+  /// Visual height of the embedded platform view.
   final double height;
+
+  /// General accent/tint color for the control.
   final Color? color;
+
+  /// Explicit thumb color; if null, uses the native default.
   final Color? thumbColor;
+
+  /// Explicit active track color.
   final Color? trackColor;
+
+  /// Explicit inactive track color.
   final Color? trackBackgroundColor;
+
+  /// Optional step interval for discrete values.
   final double? step;
 
   @override

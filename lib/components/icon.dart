@@ -5,7 +5,11 @@ import 'package:flutter/services.dart';
 import '../channel/params.dart';
 import '../style/sf_symbol.dart';
 
+/// A platform-rendered SF Symbol icon.
+///
+/// Renders an `SFSymbol` on iOS/macOS using native APIs for best fidelity.
 class CNIcon extends StatefulWidget {
+  /// Creates a platform-rendered SF Symbol icon.
   const CNIcon({
     super.key,
     required this.symbol,
@@ -16,11 +20,22 @@ class CNIcon extends StatefulWidget {
     this.height,
   });
 
+  /// The SF Symbol to render.
   final CNSymbol symbol;
+
+  /// Overrides the symbol's size.
   final double? size;
+
+  /// Overrides the symbol's color for monochrome/hierarchical modes.
   final Color? color;
+
+  /// Overrides the rendering mode.
   final CNSymbolRenderingMode? mode;
+
+  /// Whether to enable the system gradient when available.
   final bool? gradient;
+
+  /// Optional fixed height; defaults to the icon's size.
   final double? height;
 
   @override

@@ -5,7 +5,12 @@ import 'package:flutter/services.dart';
 import '../channel/params.dart';
 import '../style/sf_symbol.dart';
 
+/// A Cupertino-native segmented control.
+///
+/// Embeds a native UISegmentedControl/NSSegmentedControl for pixel-perfect
+/// fidelity on iOS and macOS.
 class CNSegmentedControl extends StatefulWidget {
+  /// Creates a Cupertino-native segmented control.
   const CNSegmentedControl({
     super.key,
     required this.labels,
@@ -23,18 +28,43 @@ class CNSegmentedControl extends StatefulWidget {
     this.iconRenderingMode,
   });
 
+  /// Segment labels to display, in order.
   final List<String> labels;
+
+  /// The index of the selected segment.
   final int selectedIndex;
+
+  /// Called when the user selects a segment.
   final ValueChanged<int> onValueChanged;
+
+  /// Whether the control is interactive.
   final bool enabled;
+
+  /// Accent/tint color used for the control.
   final Color? color;
+
+  /// Control height.
   final double height;
+
+  /// If true, sizes the control to its intrinsic width.
   final bool shrinkWrap;
+
+  /// Optional SF Symbols for segments; complements [labels].
   final List<CNSymbol>? sfSymbols;
+
+  /// Overrides the symbol size (for all segments).
   final double? iconSize;
+
+  /// Global icon color override.
   final Color? iconColor;
+
+  /// Global icon palette colors override.
   final List<Color>? iconPaletteColors;
+
+  /// Enables gradient rendering where supported.
   final bool? iconGradientEnabled;
+
+  /// Global icon rendering mode.
   final CNSymbolRenderingMode? iconRenderingMode;
 
   @override

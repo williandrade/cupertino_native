@@ -7,7 +7,12 @@ import '../channel/params.dart';
 import '../style/sf_symbol.dart';
 import '../style/button_style.dart';
 
+/// A Cupertino-native push button.
+///
+/// Embeds a native UIButton/NSButton for authentic visuals and behavior on
+/// iOS and macOS. Falls back to [CupertinoButton] on other platforms.
 class CNButton extends StatefulWidget {
+  /// Creates a text button variant of [CNButton].
   const CNButton({
     super.key,
     required this.label,
@@ -21,6 +26,7 @@ class CNButton extends StatefulWidget {
        width = null,
        round = false;
 
+  /// Creates a round, icon-only variant of [CNButton].
   const CNButton.icon({
     super.key,
     required this.icon,
@@ -36,17 +42,34 @@ class CNButton extends StatefulWidget {
        shrinkWrap = false,
        super();
 
+  /// Button text (null in icon mode).
   final String? label; // null in icon mode
+  /// Button icon (non-null in icon mode).
   final CNSymbol? icon; // non-null in icon mode
+  /// Callback when pressed.
   final VoidCallback? onPressed;
+
+  /// Whether the control is interactive and tappable.
   final bool enabled;
+
+  /// Accent/tint color.
   final Color? tint;
+
+  /// Control height.
   final double height;
+
+  /// Fixed width used in icon/round mode.
   final double? width; // fixed when round/icon mode
+  /// If true, sizes the control to its intrinsic width.
   final bool shrinkWrap;
+
+  /// Visual style to apply.
   final CNButtonStyle style;
+
+  /// Whether the icon variant (round) is used.
   final bool round;
 
+  /// Whether this instance is configured as the icon variant.
   bool get isIcon => icon != null;
 
   @override

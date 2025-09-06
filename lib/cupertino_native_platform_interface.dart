@@ -2,6 +2,8 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'cupertino_native_method_channel.dart';
 
+/// The platform interface that platform implementations of this plugin
+/// must extend.
 abstract class CupertinoNativePlatform extends PlatformInterface {
   /// Constructs a CupertinoNativePlatform.
   CupertinoNativePlatform() : super(token: _token);
@@ -23,6 +25,7 @@ abstract class CupertinoNativePlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  /// Retrieves a user-visible platform version string from the host platform.
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }

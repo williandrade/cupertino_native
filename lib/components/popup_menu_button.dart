@@ -7,24 +7,40 @@ import '../channel/params.dart';
 import '../style/sf_symbol.dart';
 import '../style/button_style.dart';
 
+/// Base type for entries in a [CNPopupMenuButton] menu.
 abstract class CNPopupMenuEntry {
+  /// Const constructor for subclasses.
   const CNPopupMenuEntry();
 }
 
+/// A selectable item in a popup menu.
 class CNPopupMenuItem extends CNPopupMenuEntry {
+  /// Creates a selectable popup menu item.
   const CNPopupMenuItem({required this.label, this.icon, this.enabled = true});
+
+  /// Display label for the item.
   final String label;
+
+  /// Optional SF Symbol shown before the label.
   final CNSymbol? icon;
+
+  /// Whether the item can be selected.
   final bool enabled;
 }
 
+/// A visual divider between popup menu items.
 class CNPopupMenuDivider extends CNPopupMenuEntry {
+  /// Creates a visual divider between items.
   const CNPopupMenuDivider();
 }
 
 // Reusable style enum for buttons across widgets (popup menu, future CNButton, ...)
 
+/// A Cupertino-native popup menu button.
+///
+/// On iOS/macOS this embeds a native popup button and shows a native menu.
 class CNPopupMenuButton extends StatefulWidget {
+  /// Creates a text-labeled popup menu button.
   const CNPopupMenuButton({
     super.key,
     required this.buttonLabel,
@@ -38,6 +54,7 @@ class CNPopupMenuButton extends StatefulWidget {
        width = null,
        round = false;
 
+  /// Creates a round, icon-only popup menu button.
   const CNPopupMenuButton.icon({
     super.key,
     required this.buttonIcon,
@@ -53,18 +70,35 @@ class CNPopupMenuButton extends StatefulWidget {
        shrinkWrap = false,
        super();
 
+  /// Text for the button (null when using [buttonIcon]).
   final String? buttonLabel; // null in icon mode
+  /// Icon for the button (non-null in icon mode).
   final CNSymbol? buttonIcon; // non-null in icon mode
   // Fixed size (width = height) when in icon mode.
+  /// Fixed width in icon mode; otherwise computed/intrinsic.
   final double? width;
+
+  /// Whether this is the round icon variant.
   final bool round; // internal: text=false, icon=true
+  /// Entries that populate the popup menu.
   final List<CNPopupMenuEntry> items;
+
+  /// Called with the selected index when the user makes a selection.
   final ValueChanged<int> onSelected;
+
+  /// Tint color for the control.
   final Color? tint;
+
+  /// Control height; icon mode uses diameter semantics.
   final double height;
+
+  /// If true, sizes the control to its intrinsic width.
   final bool shrinkWrap;
+
+  /// Visual style to apply to the button.
   final CNButtonStyle buttonStyle;
 
+  /// Whether this instance is configured as an icon button variant.
   bool get isIconButton => buttonIcon != null;
 
   @override

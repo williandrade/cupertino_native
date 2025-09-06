@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
+/// Converts a [Color] to ARGB int (0xAARRGGBB). Private helper.
 int? _argbFromColor(Color? color) {
   if (color == null) return null;
   // Use component accessors recommended by lints (.a/.r/.g/.b as doubles 0..1)

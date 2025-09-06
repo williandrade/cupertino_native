@@ -10,6 +10,7 @@ class MethodChannelCupertinoNative extends CupertinoNativePlatform {
   final methodChannel = const MethodChannel('cupertino_native');
 
   @override
+  /// See [CupertinoNativePlatform.getPlatformVersion].
   Future<String?> getPlatformVersion() async {
     final version = await methodChannel.invokeMethod<String>(
       'getPlatformVersion',

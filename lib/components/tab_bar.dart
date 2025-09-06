@@ -5,13 +5,21 @@ import 'package:flutter/services.dart';
 import '../channel/params.dart';
 import '../style/sf_symbol.dart';
 
+/// Immutable data describing a single tab bar item.
 class CNTabBarItem {
+  /// Creates a tab bar item description.
   const CNTabBarItem({this.label, this.icon});
+
+  /// Optional tab item label.
   final String? label;
+
+  /// Optional SF Symbol for the item.
   final CNSymbol? icon;
 }
 
+/// A Cupertino-native tab bar. Uses native UITabBar/NSTabView style visuals.
 class CNTabBar extends StatefulWidget {
+  /// Creates a Cupertino-native tab bar.
   const CNTabBar({
     super.key,
     required this.items,
@@ -27,16 +35,36 @@ class CNTabBar extends StatefulWidget {
     this.splitSpacing = 8.0,
   });
 
+  /// Items to display in the tab bar.
   final List<CNTabBarItem> items;
+
+  /// The index of the currently selected item.
   final int currentIndex;
+
+  /// Called when the user selects a new item.
   final ValueChanged<int> onTap;
+
+  /// Accent/tint color.
   final Color? tint;
+
+  /// Background color for the bar.
   final Color? backgroundColor;
+
+  /// Default icon size when item icon does not specify one.
   final double? iconSize;
+
+  /// Fixed height; if null uses intrinsic height reported by native view.
   final double? height;
+
+  /// When true, splits items between left and right sections.
   final bool split;
+
+  /// How many trailing items to pin right when [split] is true.
   final int rightCount; // how many trailing items to pin right when split
+  /// When true, centers the split groups more tightly.
   final bool shrinkCentered;
+
+  /// Gap between left/right halves when split.
   final double splitSpacing; // gap between left/right halves when split
 
   @override

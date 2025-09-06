@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import '../channel/params.dart';
 
+/// Controller for a [CNSwitch] that allows imperative updates from Dart
+/// to the underlying native UISwitch/NSSwitch instance.
 class CNSwitchController {
   MethodChannel? _channel;
 
@@ -16,6 +18,8 @@ class CNSwitchController {
     _channel = null;
   }
 
+  /// Sets the switch [value]. When [animated] is true the change is animated
+  /// on the native control.
   Future<void> setValue(bool value, {bool animated = false}) async {
     final channel = _channel;
     if (channel == null) return;
@@ -25,6 +29,7 @@ class CNSwitchController {
     });
   }
 
+  /// Enables or disables user interaction on the native switch.
   Future<void> setEnabled(bool enabled) async {
     final channel = _channel;
     if (channel == null) return;
@@ -32,7 +37,12 @@ class CNSwitchController {
   }
 }
 
+/// A Cupertino-native switch rendered by the host platform.
+///
+/// On iOS/macOS this uses a platform view to embed UISwitch/NSSwitch, and
+/// falls back to Flutter's [Switch] on unsupported platforms.
 class CNSwitch extends StatefulWidget {
+  /// Creates a Cupertino-native switch.
   const CNSwitch({
     super.key,
     required this.value,
@@ -43,11 +53,22 @@ class CNSwitch extends StatefulWidget {
     this.color,
   });
 
+  /// Whether the switch is on.
   final bool value;
+
+  /// Whether the control is interactive.
   final bool enabled;
+
+  /// Callback invoked when the user toggles the value.
   final ValueChanged<bool> onChanged;
+
+  /// Optional controller to imperatively control the native view.
   final CNSwitchController? controller;
+
+  /// Visual height of the embedded platform view.
   final double height;
+
+  /// Optional tint color to apply to the switch.
   final Color? color;
 
   @override
