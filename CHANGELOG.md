@@ -1,3 +1,7 @@
+## 0.1.1
+
+* Adds link to blog post in readme.
+
 ## 0.1.0
 
 * Cleaned up API.
