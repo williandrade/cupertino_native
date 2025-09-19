@@ -11,6 +11,9 @@ export 'components/popup_menu_button.dart';
 export 'style/sf_symbol.dart';
 export 'style/button_style.dart';
 export 'components/button.dart';
+export 'components/input.dart';
+export 'components/navigation_bar.dart';
+export 'components/glass_effect_container.dart';
 
 import 'cupertino_native_platform_interface.dart';
 

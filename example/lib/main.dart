@@ -7,6 +7,8 @@ import 'demos/tab_bar.dart';
 import 'demos/icon.dart';
 import 'demos/popup_menu_button.dart';
 import 'demos/button.dart';
+import 'demos/navigation_bar.dart';
+import 'demos/glass_effect_container.dart';
 
 void main() {
   runApp(const MyApp());
@@ -86,7 +88,7 @@ class HomePage extends StatelessWidget {
       navigationBar: CupertinoNavigationBar(
         backgroundColor: CupertinoColors.systemGroupedBackground,
         border: null,
-        // middle: const Text('Cupertino Native'),
+        middle: const Text('Cupertino Native'),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -212,6 +214,39 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     CupertinoPageRoute(builder: (_) => const TabBarDemoPage()),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Navigation Bar'),
+                leading: CNIcon(
+                  symbol: CNSymbol('menubar.rectangle', color: accentColor),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const NavigationBarDemoPage(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          CupertinoListSection.insetGrouped(
+            header: Text('Effects'),
+            children: [
+              CupertinoListTile(
+                title: Text('Glass Effect Container'),
+                leading: CNIcon(
+                  symbol: CNSymbol('rectangle.stack.fill', color: accentColor),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const GlassEffectContainerDemoPage(),
+                    ),
                   );
                 },
               ),

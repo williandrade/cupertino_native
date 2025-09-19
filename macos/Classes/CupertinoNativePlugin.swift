@@ -27,6 +27,15 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let buttonFactory = CupertinoButtonViewFactory(messenger: registrar.messenger)
     registrar.register(buttonFactory, withId: "CupertinoNativeButton")
+
+    let inputFactory = CupertinoInputViewFactory(messenger: registrar.messenger)
+    registrar.register(inputFactory, withId: "CupertinoNativeInput")
+
+    let navigationBarFactory = CupertinoNavigationBarViewFactory(messenger: registrar.messenger)
+    registrar.register(navigationBarFactory, withId: "CupertinoNativeNavigationBar")
+
+    let glassEffectContainerFactory = CupertinoGlassEffectContainerViewFactory(messenger: registrar.messenger)
+    registrar.register(glassEffectContainerFactory, withId: "CupertinoNativeGlassEffectContainer")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

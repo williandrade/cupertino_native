@@ -2,9 +2,16 @@ import Flutter
 import UIKit
 
 public class CupertinoNativePlugin: NSObject, FlutterPlugin {
+  public static var shared: CupertinoNativePlugin?
+  public weak var registrar: FlutterPluginRegistrar?
+  public weak var flutterEngine: FlutterEngine?
+  
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "cupertino_native", binaryMessenger: registrar.messenger())
     let instance = CupertinoNativePlugin()
+    // Store the registrar to access its engine later
+    instance.registrar = registrar
+    CupertinoNativePlugin.shared = instance
     registrar.addMethodCallDelegate(instance, channel: channel)
 
     // Register platform view factories
@@ -29,6 +36,15 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let buttonFactory = CupertinoButtonViewFactory(messenger: registrar.messenger())
     registrar.register(buttonFactory, withId: "CupertinoNativeButton")
+
+    let inputFactory = CupertinoInputViewFactory(messenger: registrar.messenger())
+    registrar.register(inputFactory, withId: "CupertinoNativeInput")
+
+    let navigationBarFactory = CupertinoNavigationBarViewFactory(messenger: registrar.messenger())
+    registrar.register(navigationBarFactory, withId: "CupertinoNativeNavigationBar")
+
+    let glassEffectContainerFactory = CupertinoGlassEffectContainerViewFactory(messenger: registrar.messenger())
+    registrar.register(glassEffectContainerFactory, withId: "CupertinoNativeGlassEffectContainer")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

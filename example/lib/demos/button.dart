@@ -46,6 +46,13 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   shrinkWrap: true,
                 ),
                 CNButton(
+                  label: 'Tinted Red',
+                  style: CNButtonStyle.tinted,
+                  tint: Color.fromARGB(255, 255, 0, 0),
+                  onPressed: () => _set('Tinted'),
+                  shrinkWrap: true,
+                ),
+                CNButton(
                   label: 'Bordered',
                   style: CNButtonStyle.bordered,
                   onPressed: () => _set('Bordered'),
@@ -70,9 +77,23 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   shrinkWrap: true,
                 ),
                 CNButton(
+                  label: 'Glass Red',
+                  style: CNButtonStyle.glass,
+                  tint: Color.fromARGB(255, 255, 0, 0),
+                  onPressed: () => _set('Glass Red'),
+                  shrinkWrap: true,
+                ),
+                CNButton(
                   label: 'ProminentGlass',
                   style: CNButtonStyle.prominentGlass,
                   onPressed: () => _set('ProminentGlass'),
+                  shrinkWrap: true,
+                ),
+                CNButton(
+                  label: 'ProminentGlass Red',
+                  style: CNButtonStyle.prominentGlass,
+                  tint: Color.fromARGB(255, 255, 0, 0),
+                  onPressed: () => _set('ProminentGlass Red'),
                   shrinkWrap: true,
                 ),
                 CNButton(
