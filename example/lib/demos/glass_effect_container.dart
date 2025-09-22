@@ -68,49 +68,85 @@ class _GlassEffectContainerDemoPageState
                 ),
               ),
               const SizedBox(height: 12),
-              Stack(
-                children: [
-                  CNGlassEffectContainer(
-                    glassStyle: _selectedGlassStyle,
-                    tint: _selectedTint,
-                    cornerRadius: _cornerRadius,
-                    interactive: _interactive,
-                    width: double.infinity,
-                    height: 120,
-                    onTap: () => setState(
-                      () => _lastTapEvent = 'Basic container tapped',
-                    ),
-                    child: Container(),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: 120,
-                    padding: const EdgeInsets.all(16.0),
-                    child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Glass Effect Container',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: CupertinoColors.label,
-                          ),
+              CNGlassEffectContainer(
+                glassStyle: _selectedGlassStyle,
+                tint: _selectedTint,
+                cornerRadius: _cornerRadius,
+                interactive: _interactive,
+                height: 150,
+                width: 20,
+                onTap: () =>
+                    setState(() => _lastTapEvent = 'Basic container tapped'),
+                child: Container(
+                  width: double.infinity,
+                  height: 120,
+                  padding: const EdgeInsets.all(16.0),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Glass Effect Container',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: CupertinoColors.label,
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Native glass effects with translucent backgrounds.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: CupertinoColors.label,
-                          ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Native glass effects with translucent backgrounds.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: CupertinoColors.label,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
 
+              // Stack(
+              //   children: [
+              //     CNGlassEffectContainer(
+              //       glassStyle: _selectedGlassStyle,
+              //       tint: _selectedTint,
+              //       cornerRadius: _cornerRadius,
+              //       interactive: _interactive,
+              //       width: double.infinity,
+              //       height: 120,
+              //       onTap: () => setState(
+              //         () => _lastTapEvent = 'Basic container tapped',
+              //       ),
+              //       child: Container(),
+              //     ),
+              //     Container(
+              //       width: double.infinity,
+              //       height: 120,
+              //       padding: const EdgeInsets.all(16.0),
+              //       child: const Column(
+              //         crossAxisAlignment: CrossAxisAlignment.start,
+              //         children: [
+              //           Text(
+              //             'Glass Effect Container',
+              //             style: TextStyle(
+              //               fontSize: 20,
+              //               fontWeight: FontWeight.bold,
+              //               color: CupertinoColors.label,
+              //             ),
+              //           ),
+              //           SizedBox(height: 8),
+              //           Text(
+              //             'Native glass effects with translucent backgrounds.',
+              //             style: TextStyle(
+              //               fontSize: 14,
+              //               color: CupertinoColors.label,
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ],
+              // ),
               const SizedBox(height: 32),
 
               // Stacked Glass Effects (updated to use glassStyle)

@@ -11,6 +11,89 @@ enum CNGlassStyle {
   clear,
 }
 
+/// A Cupertino-native glass effect container.
+///
+/// Provides native glass morphing effects using UIVisualEffectView on iOS
+/// and NSVisualEffectView on macOS. On iOS 16+, can use the modern UIGlassEffect
+/// for enhanced liquid glass appearance.
+///
+///
+/// Example:
+/// ```dart
+/// CNGlassEffectContainer(
+///   glassStyle: CNGlassStyle.regular,
+///   tint: CupertinoColors.systemBlue,
+///   cornerRadius: 16,
+///   interactive: false,
+///   onTap: () {},
+///   width: 200,
+///   height: 100,
+///   child: Container(), // Your Flutter content
+/// )
+/// ```
+class CNGlassEffectContainer extends StatelessWidget {
+  /// Creates a Cupertino-native glass effect container.
+  const CNGlassEffectContainer({
+    super.key,
+    required this.child,
+    this.glassStyle = CNGlassStyle.regular,
+    this.tint,
+    this.cornerRadius = 0.0,
+    this.interactive = false,
+    this.onTap,
+    this.width = double.infinity,
+    this.height = double.infinity,
+  });
+
+  /// The child widget.
+  final Widget child;
+
+  /// The glass style.
+  final CNGlassStyle glassStyle;
+
+  /// Optional tint color. Must comply with ARGB format.
+  final Color? tint;
+
+  /// Corner radius.
+  final double cornerRadius;
+
+  /// If interactive.
+  final bool interactive;
+
+  /// Tap callback.
+  final VoidCallback? onTap;
+
+  /// Width.
+  final double width;
+
+  /// Height.
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CNGlassEffectContainerInternal(
+            glassStyle: glassStyle,
+            tint: tint,
+            cornerRadius: cornerRadius,
+            interactive: interactive,
+            onTap: onTap,
+            width: double.infinity,
+            height: double.infinity,
+            child: Container(), // Empty container
+          ),
+          Positioned.fill(child: child),
+        ],
+      ),
+    );
+  }
+}
+
 /// A simplified Cupertino-native glass effect container focused on UIGlassEffect.
 ///
 /// Provides native glass morphing effects using UIVisualEffectView on iOS
@@ -24,7 +107,7 @@ enum CNGlassStyle {
 /// ```dart
 /// Stack(
 ///   children: [
-///     CNGlassEffectContainer(
+///     CNGlassEffectContainerInternal(
 ///       effect: CNGlassEffect.systemMaterial,
 ///       useGlassEffect: true, // Enable modern glass effect (iOS 16+)
 ///       width: 200,
@@ -37,9 +120,9 @@ enum CNGlassStyle {
 ///   ],
 /// )
 /// ```
-class CNGlassEffectContainer extends StatefulWidget {
+class CNGlassEffectContainerInternal extends StatefulWidget {
   /// Creates a glass effect container.
-  const CNGlassEffectContainer({
+  const CNGlassEffectContainerInternal({
     super.key,
     required this.child,
     this.glassStyle = CNGlassStyle.regular,
@@ -76,10 +159,12 @@ class CNGlassEffectContainer extends StatefulWidget {
   final double? height;
 
   @override
-  State<CNGlassEffectContainer> createState() => _CNGlassEffectContainerState();
+  State<CNGlassEffectContainerInternal> createState() =>
+      _CNGlassEffectContainerState();
 }
 
-class _CNGlassEffectContainerState extends State<CNGlassEffectContainer> {
+class _CNGlassEffectContainerState
+    extends State<CNGlassEffectContainerInternal> {
   MethodChannel? _channel;
 
   CNGlassStyle? _lastGlassStyle;
@@ -96,7 +181,7 @@ class _CNGlassEffectContainerState extends State<CNGlassEffectContainer> {
   }
 
   @override
-  void didUpdateWidget(covariant CNGlassEffectContainer oldWidget) {
+  void didUpdateWidget(covariant CNGlassEffectContainerInternal oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncPropsToNativeIfNeeded();
   }
