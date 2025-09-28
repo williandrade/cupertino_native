@@ -41,6 +41,7 @@ class _NavigationBarDemoPageState extends State<NavigationBarDemoPage> {
             const SizedBox(height: 12),
             CNNavigationBar(
               title: 'Basic Title',
+              color: CupertinoColors.activeOrange,
               leadingGroups: [
                 CNNavigationBarButtonGroup(
                   buttons: [
@@ -48,7 +49,7 @@ class _NavigationBarDemoPageState extends State<NavigationBarDemoPage> {
                       title: 'Edit',
                       sfSymbol: 'pencil',
                       buttonType: ButtonType.prominent,
-                      sfSymbolColor: CupertinoColors.systemBackground,
+                      sfSymbolColor: CupertinoColors.activeOrange,
                       onPressed: () =>
                           setState(() => _lastButtonPressed = 'Edit'),
                     ),

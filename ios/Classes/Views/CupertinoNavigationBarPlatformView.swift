@@ -12,6 +12,9 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
   private var centerGroups: [[String: Any]] = []
   private var trailingGroups: [[String: Any]] = []
 
+  // Cache bar button items for smooth updates
+  private var cachedBarButtonItems: [String: UIBarButtonItem] = [:]
+
   // Added: default icon color from theme/style
   private var defaultIconColor: UIColor? = nil
   private var backgroundColor: UIColor? = nil
@@ -82,7 +85,9 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
     // Set large title display mode
     navigationItem.largeTitleDisplayMode = parseLargeTitleDisplayMode(largeTitleDisplayMode)
 
-    if let t = title { navigationItem.title = t }
+    if let t = title {
+      navigationItem.title = t
+    }
 
     // Add navigation item to bar
     navigationBar.setItems([navigationItem], animated: true)
@@ -95,7 +100,7 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
       navigationBar.heightAnchor.constraint(equalToConstant: height),
     ])
 
-    rebuildButtonGroups()
+    rebuildButtonGroups(animated: false)
 
     channel.setMethodCallHandler { [weak self] call, result in
       guard let self = self else {
@@ -125,7 +130,7 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
             if let trailing = args["trailingGroups"] as? [[String: Any]] {
               self.trailingGroups = trailing
             }
-            self.rebuildButtonGroups()
+            self.rebuildButtonGroups(animated: true)
             result(nil)
           }
         } else {
@@ -138,7 +143,7 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
               let color = Self.colorFromARGB(n.intValue)
               self.navigationBar.tintColor = color
               self.defaultIconColor = color
-              self.rebuildButtonGroups()
+              self.rebuildButtonGroups(animated: true)
             }
             result(nil)
           }
@@ -222,281 +227,324 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
 
   func view() -> UIView { container }
 
-  private func rebuildButtonGroups() {
+  private func rebuildButtonGroups(animated: Bool = true) {
+    let navItem = navigationBar.topItem ?? navigationItem
+
+    var usedKeys: Set<String> = []
+
+    let leadingGroupItems = buildGroupItems(
+      from: leadingGroups,
+      groupType: "leading",
+      usedKeys: &usedKeys
+    )
+    let centerGroupItems = buildGroupItems(
+      from: centerGroups,
+      groupType: "center",
+      usedKeys: &usedKeys
+    )
+    let trailingGroupItems = buildGroupItems(
+      from: trailingGroups,
+      groupType: "trailing",
+      usedKeys: &usedKeys
+    )
+
     if #available(iOS 16.0, *) {
-      // Use modern item groups API with smart updates
-      navigationItem.leadingItemGroups = updateItemGroups(
-        current: navigationItem.leadingItemGroups, 
-        new: leadingGroups, 
-        groupType: "leading"
-      )
-      navigationItem.centerItemGroups = updateItemGroups(
-        current: navigationItem.centerItemGroups, 
-        new: centerGroups, 
-        groupType: "center"
-      )
-      navigationItem.trailingItemGroups = updateItemGroups(
-        current: navigationItem.trailingItemGroups, 
-        new: trailingGroups, 
-        groupType: "trailing"
-      )
-    } else {
-      // Fallback for older iOS versions with smart updates
-      let newLeftItems = createNewBarButtonItems(from: leadingGroups, groupType: "leading")
-      let newRightItems = createNewBarButtonItems(from: trailingGroups, groupType: "trailing")
-      
-      // Smart update for left items
-      let updatedLeftItems = updateBarButtonItems(
-        current: navigationItem.leftBarButtonItems ?? [], 
-        new: newLeftItems
-      )
-      
-      // Smart update for right items  
-      let updatedRightItems = updateBarButtonItems(
-        current: navigationItem.rightBarButtonItems ?? [], 
-        new: newRightItems
-      )
-
-      navigationItem.setLeftBarButtonItems(updatedLeftItems.isEmpty ? nil : updatedLeftItems, animated: true)
-      navigationItem.setRightBarButtonItems(updatedRightItems.isEmpty ? nil : updatedRightItems, animated: true)
-
-      // Center groups fallback - use title view if there's only one center item
-      updateCenterTitleView()
-    }
-  }
-  
-  private func createNewBarButtonItems(from groupsData: [[String: Any]], groupType: String) -> [UIBarButtonItem] {
-    var items: [UIBarButtonItem] = []
-    for (groupIndex, group) in groupsData.enumerated() {
-      if let buttons = group["buttons"] as? [[String: Any]] {
-        items.append(
-          contentsOf: createBarButtonItems(
-            from: buttons, groupIndex: groupIndex, groupType: groupType))
+      navItem.leadingItemGroups = leadingGroupItems.map {
+        UIBarButtonItemGroup(barButtonItems: $0, representativeItem: nil)
+      }
+      navItem.centerItemGroups = centerGroupItems.map {
+        UIBarButtonItemGroup(barButtonItems: $0, representativeItem: nil)
+      }
+      navItem.trailingItemGroups = trailingGroupItems.map {
+        UIBarButtonItemGroup(barButtonItems: $0, representativeItem: nil)
       }
     }
-    return items
-  }
-  
-  private func updateCenterTitleView() {
-    if centerGroups.count == 1, let buttons = centerGroups[0]["buttons"] as? [[String: Any]],
-      buttons.count == 1
-    {
-      let button = createBarButtonItems(from: buttons, groupIndex: 0, groupType: "center").first
-      if let btn = button {
-        let customView = UIButton(type: .system)
-        customView.setTitle(btn.title, for: .normal)
-        customView.setImage(btn.image, for: .normal)
-        navigationItem.titleView = customView
-      }
-    } else {
-      navigationItem.titleView = nil
-    }
-  }
-  
-  private func updateBarButtonItems(current: [UIBarButtonItem], new: [UIBarButtonItem]) -> [UIBarButtonItem] {
-    // If new array is empty, return empty (clear all)
-    if new.isEmpty {
-      return []
-    }
-    
-    // If current array is empty, return all new items
-    if current.isEmpty {
-      return new
-    }
-    
-    var result: [UIBarButtonItem] = []
-    
-    // Compare items and reuse existing ones where possible
-    for (index, newItem) in new.enumerated() {
-      if index < current.count {
-        let currentItem = current[index]
-        
-        // Check if we can reuse the existing item by updating its properties
-        if canReuseBarButtonItem(current: currentItem, new: newItem) {
-          updateBarButtonItem(current: currentItem, with: newItem)
-          result.append(currentItem)
-        } else {
-          // Need to replace with new item
-          result.append(newItem)
-        }
-      } else {
-        // Adding new item beyond current array length
-        result.append(newItem)
-      }
-    }
-    
-    return result
-  }
-  
-  private func canReuseBarButtonItem(current: UIBarButtonItem, new: UIBarButtonItem) -> Bool {
-    // We can reuse if the basic structure is the same (both have title or both have image)
-    let currentHasTitle = current.title != nil && !current.title!.isEmpty
-    let newHasTitle = new.title != nil && !new.title!.isEmpty
-    let currentHasImage = current.image != nil
-    let newHasImage = new.image != nil
-    
-    // Both should have the same type (title vs image)
-    return (currentHasTitle == newHasTitle) && (currentHasImage == newHasImage)
-  }
-  
-  private func updateBarButtonItem(current: UIBarButtonItem, with new: UIBarButtonItem) {
-    // Update properties that can be changed without recreating the item
-    current.title = new.title
-    current.image = new.image
-    current.isEnabled = new.isEnabled
-    current.tag = new.tag
-    current.target = new.target
-    current.action = new.action
-    current.style = new.style
+
+    let flatLeadingItems = leadingGroupItems.flatMap { $0 }
+    applyLeftBarButtonItems(flatLeadingItems, to: navItem, animated: animated)
+
+    let flatTrailingItems = trailingGroupItems.flatMap { $0 }
+    applyRightBarButtonItems(flatTrailingItems, to: navItem, animated: animated)
+
+    updateCenterTitleView(on: navItem, using: centerGroupItems)
+
+    cleanupCachedBarButtonItems(keeping: usedKeys)
+
+    navigationBar.setNeedsLayout()
+    navigationBar.layoutIfNeeded()
   }
 
-  @available(iOS 16.0, *)
-  private func updateItemGroups(
-    current: [UIBarButtonItemGroup], 
-    new newGroupsData: [[String: Any]], 
-    groupType: String
-  ) -> [UIBarButtonItemGroup] {
-    // If new data is empty, return empty array (clear all)
-    if newGroupsData.isEmpty {
-      return []
-    }
-    
-    // If current is empty, create all new groups
-    if current.isEmpty {
-      return createItemGroups(from: newGroupsData, groupType: groupType)
-    }
-    
-    var result: [UIBarButtonItemGroup] = []
-    
-    // Compare groups and reuse where possible
-    for (index, groupData) in newGroupsData.enumerated() {
-      guard let buttonsData = groupData["buttons"] as? [[String: Any]] else { continue }
-      
-      if index < current.count {
-        let currentGroup = current[index]
-        let newItems = createBarButtonItems(from: buttonsData, groupIndex: index, groupType: groupType)
-        
-        // Try to update existing group's items
-        let updatedItems = updateBarButtonItems(current: currentGroup.barButtonItems, new: newItems)
-        
-        // Create new group with updated items, but try to preserve the representative item if possible
-        let updatedGroup = UIBarButtonItemGroup(
-          barButtonItems: updatedItems, 
-          representativeItem: currentGroup.representativeItem
-        )
-        result.append(updatedGroup)
-      } else {
-        // Adding new group beyond current array length
-        let newItems = createBarButtonItems(from: buttonsData, groupIndex: index, groupType: groupType)
-        let newGroup = UIBarButtonItemGroup(barButtonItems: newItems, representativeItem: nil)
-        result.append(newGroup)
-      }
-    }
-    
-    return result
-  }
-
-  @available(iOS 16.0, *)
-  private func createItemGroups(from groupsData: [[String: Any]], groupType: String)
-    -> [UIBarButtonItemGroup]
-  {
+  private func buildGroupItems(
+    from groupsData: [[String: Any]],
+    groupType: String,
+    usedKeys: inout Set<String>
+  ) -> [[UIBarButtonItem]] {
     return groupsData.enumerated().compactMap { (groupIndex, groupData) in
-      guard let buttonsData = groupData["buttons"] as? [[String: Any]] else { return nil }
-      let items = createBarButtonItems(
-        from: buttonsData, groupIndex: groupIndex, groupType: groupType)
-      return UIBarButtonItemGroup(barButtonItems: items, representativeItem: nil)
+      guard let buttons = groupData["buttons"] as? [[String: Any]] else { return nil }
+
+      let items = buttons.enumerated().compactMap { (buttonIndex, buttonData) -> UIBarButtonItem? in
+        makeBarButtonItem(
+          groupType: groupType,
+          groupIndex: groupIndex,
+          buttonIndex: buttonIndex,
+          buttonData: buttonData,
+          usedKeys: &usedKeys
+        )
+      }
+
+      return items.isEmpty ? nil : items
     }
   }
 
-  private func createBarButtonItems(
-    from buttonsData: [[String: Any]], groupIndex: Int, groupType: String
-  ) -> [UIBarButtonItem] {
-    return buttonsData.enumerated().compactMap { (buttonIndex, buttonData) in
-      guard let title = buttonData["title"] as? String else { return nil }
+  private func makeBarButtonItem(
+    groupType: String,
+    groupIndex: Int,
+    buttonIndex: Int,
+    buttonData: [String: Any],
+    usedKeys: inout Set<String>
+  ) -> UIBarButtonItem? {
+    guard let title = buttonData["title"] as? String else { return nil }
 
-      var image: UIImage? = nil
-      let tagOffset = groupType == "leading" ? 0 : (groupType == "center" ? 1000 : 2000)
+    let key = barButtonItemKey(
+      from: buttonData,
+      groupType: groupType,
+      groupIndex: groupIndex,
+      buttonIndex: buttonIndex
+    )
 
-      if let symbolName = buttonData["sfSymbol"] as? String, !symbolName.isEmpty {
-        image = UIImage(systemName: symbolName)
+    usedKeys.insert(key)
 
-        // Apply symbol styling
-        if let size = buttonData["sfSymbolSize"] as? NSNumber {
-          let config = UIImage.SymbolConfiguration(pointSize: CGFloat(truncating: size))
+    let item: UIBarButtonItem
+    if let cached = cachedBarButtonItems[key] {
+      item = cached
+    } else {
+      item = UIBarButtonItem(title: title, style: .plain, target: self, action: #selector(buttonTapped(_:)))
+      cachedBarButtonItems[key] = item
+    }
+
+    configureBarButtonItem(
+      item,
+      with: buttonData,
+      title: title,
+      groupType: groupType,
+      groupIndex: groupIndex,
+      buttonIndex: buttonIndex
+    )
+
+    return item
+  }
+
+  private func barButtonItemKey(
+    from buttonData: [String: Any],
+    groupType: String,
+    groupIndex: Int,
+    buttonIndex: Int
+  ) -> String {
+    if let identifier = buttonData["identifier"] as? String, !identifier.isEmpty {
+      return "\(groupType)::\(identifier)"
+    }
+    return "\(groupType)#\(groupIndex)#\(buttonIndex)"
+  }
+
+  private func configureBarButtonItem(
+    _ item: UIBarButtonItem,
+    with buttonData: [String: Any],
+    title: String,
+    groupType: String,
+    groupIndex: Int,
+    buttonIndex: Int
+  ) {
+    item.target = self
+    item.action = #selector(buttonTapped(_:))
+    var shouldImageFollowTint = true;
+
+    if #available(iOS 26.0, *) {
+      item.style = resolveButtonStyle(from: buttonData)
+      shouldImageFollowTint = item.style != .prominent
+    } else if let buttonType = buttonData["buttonType"] as? String, buttonType == "done" {
+      item.style = .done
+    } else if let buttonType = buttonData["buttonType"] as? String, buttonType == "plain" {
+      item.style = .plain
+    } else {
+      item.style = .plain
+    }
+
+    item.tag = tagOffsetFor(groupType: groupType, groupIndex: groupIndex, buttonIndex: buttonIndex)
+
+    if let identifier = buttonData["identifier"] as? String, !identifier.isEmpty {
+      item.accessibilityIdentifier = identifier
+    } else {
+      item.accessibilityIdentifier = nil
+    }
+
+    item.title = title
+
+    let resolvedTint: UIColor? = {
+      if let colorValue = buttonData["sfSymbolColor"] as? NSNumber {
+        return Self.colorFromARGB(colorValue.intValue)
+      }
+      return defaultIconColor ?? navigationBar.tintColor
+    }()
+
+    item.tintColor = resolvedTint
+
+    
+    var image: UIImage? = nil
+    if (shouldImageFollowTint) {
+      image = makeSymbolImage(from: buttonData, fallbackTint: resolvedTint)
+    } else {
+      image = makeSymbolImage(from: buttonData, fallbackTint: nil)
+    }
+
+    item.image = image
+    if image == nil {
+      item.title = title
+    }
+
+    if let enabled = buttonData["enabled"] as? NSNumber {
+      item.isEnabled = enabled.boolValue
+    } else {
+      item.isEnabled = true
+    }
+
+    if #available(iOS 16.0, *) {
+      if let hiddenValue = buttonData["hidden"] as? NSNumber {
+        item.isHidden = hiddenValue.boolValue
+      } else {
+        item.isHidden = false
+      }
+    }
+  }
+
+  private func resolveButtonStyle(from buttonData: [String: Any]) -> UIBarButtonItem.Style {
+    if let buttonType = buttonData["buttonType"] as? String {
+      if #available(iOS 26.0, *), buttonType == "prominent" {
+        return .prominent
+      }
+    }
+    return .plain
+  }
+
+  private func makeSymbolImage(from buttonData: [String: Any], fallbackTint: UIColor?) -> UIImage? {
+    guard let symbolName = buttonData["sfSymbol"] as? String, !symbolName.isEmpty else {
+      return nil
+    }
+
+    var image = UIImage(systemName: symbolName)
+
+    if let size = buttonData["sfSymbolSize"] as? NSNumber {
+      let config = UIImage.SymbolConfiguration(pointSize: CGFloat(truncating: size))
+      image = image?.applyingSymbolConfiguration(config)
+    }
+
+    if let renderMode = buttonData["sfSymbolRenderingMode"] as? String {
+      switch renderMode {
+      case "hierarchical":
+        if #available(iOS 15.0, *) {
+          if let color = fallbackTint ?? defaultIconColor ?? navigationBar.tintColor {
+            let config = UIImage.SymbolConfiguration(hierarchicalColor: color)
+            image = image?.applyingSymbolConfiguration(config)
+          }
+        }
+      case "palette":
+        if #available(iOS 15.0, *),
+          let paletteColors = buttonData["sfSymbolPaletteColors"] as? [NSNumber]
+        {
+          let colors = paletteColors.map { Self.colorFromARGB($0.intValue) }
+          let config = UIImage.SymbolConfiguration(paletteColors: colors)
           image = image?.applyingSymbolConfiguration(config)
         }
-
-        // Determine rendering mode and color
-        let perItemColor: UIColor? = {
-          if let colorArgb = buttonData["sfSymbolColor"] as? NSNumber {
-            return Self.colorFromARGB(colorArgb.intValue)
-          }
-          return nil
-        }()
-        let renderMode = buttonData["sfSymbolRenderingMode"] as? String
-
-        if let mode = renderMode {
-          switch mode {
-          case "hierarchical":
-            if #available(iOS 15.0, *) {
-              if let color = perItemColor ?? self.defaultIconColor {
-                let cfg = UIImage.SymbolConfiguration(hierarchicalColor: color)
-                image = image?.applyingSymbolConfiguration(cfg)
-              }
-            }
-          case "palette":
-            if #available(iOS 15.0, *),
-              let paletteColors = buttonData["sfSymbolPaletteColors"] as? [NSNumber]
-            {
-              let colors = paletteColors.map { Self.colorFromARGB($0.intValue) }
-              let config = UIImage.SymbolConfiguration(paletteColors: colors)
-              image = image?.applyingSymbolConfiguration(config)
-            }
-          case "multicolor":
-            if #available(iOS 15.0, *) {
-              let config = UIImage.SymbolConfiguration.preferringMulticolor()
-              image = image?.applyingSymbolConfiguration(config)
-            }
-          default:
-            break
-          }
-        } else if let color = perItemColor ?? self.defaultIconColor {
-          if #available(iOS 13.0, *) {
-            image = image?.withTintColor(color, renderingMode: .alwaysOriginal)
-          }
+      case "multicolor":
+        if #available(iOS 15.0, *) {
+          let config = UIImage.SymbolConfiguration.preferringMulticolor()
+          image = image?.applyingSymbolConfiguration(config)
         }
+      default:
+        break
       }
-
-      // Determine button style based on parameter
-      let buttonStyle: UIBarButtonItem.Style = {
-        if let buttonType = buttonData["buttonType"] as? String {
-          if #available(iOS 26.0, *) {
-            if buttonType == "prominent" {
-              return .prominent
-            }
-          }
-        }
-        return .plain  // Default to plain
-      }()
-
-      var item: UIBarButtonItem
-      if let image = image {
-        item = UIBarButtonItem(
-          image: image, style: buttonStyle, target: self, action: #selector(buttonTapped(_:)))
-      } else {
-        item = UIBarButtonItem(
-          title: title, style: buttonStyle, target: self, action: #selector(buttonTapped(_:)))
+    } else if let tint = fallbackTint ?? defaultIconColor ?? navigationBar.tintColor {
+      if #available(iOS 13.0, *) {
+        image = image?.withTintColor(tint, renderingMode: .alwaysOriginal)
       }
-
-      // Store index information for callback with different ranges for different group types
-      item.tag = tagOffset + groupIndex * 100 + buttonIndex
-
-      if let enabled = buttonData["enabled"] as? NSNumber {
-        item.isEnabled = enabled.boolValue
-      }
-
-      return item
     }
+
+    return image
+  }
+
+  private func tagOffsetForGroupType(_ groupType: String) -> Int {
+    switch groupType {
+    case "center":
+      return 1000
+    case "trailing":
+      return 2000
+    default:
+      return 0
+    }
+  }
+
+  private func tagOffsetFor(
+    groupType: String,
+    groupIndex: Int,
+    buttonIndex: Int
+  ) -> Int {
+    return tagOffsetForGroupType(groupType) + groupIndex * 100 + buttonIndex
+  }
+
+  private func applyRightBarButtonItems(
+    _ items: [UIBarButtonItem],
+    to navItem: UINavigationItem,
+    animated: Bool
+  ) {
+    let currentItems = navItem.rightBarButtonItems ?? []
+    let newItems = items
+
+    let itemsChanged = currentItems.count != newItems.count
+      || zip(currentItems, newItems).contains(where: { $0.0 !== $0.1 })
+
+    guard itemsChanged else { return }
+
+    if animated {
+      navItem.setRightBarButtonItems(nil, animated: true)
+      navItem.setRightBarButtonItems(newItems, animated: true)
+    } else {
+      navItem.setRightBarButtonItems(newItems.isEmpty ? nil : newItems, animated: false)
+    }
+  }
+
+  private func applyLeftBarButtonItems(
+    _ items: [UIBarButtonItem],
+    to navItem: UINavigationItem,
+    animated: Bool
+  ) {
+    let currentItems = navItem.leftBarButtonItems ?? []
+    let newItems = items
+
+    let itemsChanged = currentItems.count != newItems.count
+      || zip(currentItems, newItems).contains(where: { $0.0 !== $0.1 })
+
+    guard itemsChanged else { return }
+
+    navItem.setLeftBarButtonItems(newItems.isEmpty ? nil : newItems, animated: animated)
+  }
+
+  private func updateCenterTitleView(
+    on navItem: UINavigationItem,
+    using centerGroupItems: [[UIBarButtonItem]]
+  ) {
+    if centerGroupItems.count == 1, let firstItem = centerGroupItems.first?.first {
+      let displayButton = UIButton(type: .system)
+      displayButton.setTitle(firstItem.title, for: .normal)
+      displayButton.setImage(firstItem.image, for: .normal)
+      displayButton.tintColor = firstItem.tintColor
+      displayButton.isUserInteractionEnabled = false
+      navItem.titleView = displayButton
+    } else {
+      navItem.titleView = nil
+    }
+  }
+
+  private func cleanupCachedBarButtonItems(keeping usedKeys: Set<String>) {
+    cachedBarButtonItems = cachedBarButtonItems.filter { usedKeys.contains($0.key) }
   }
 
   @objc private func buttonTapped(_ sender: UIBarButtonItem) {
@@ -625,15 +673,15 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
         CupertinoNavigationBarPlatformViewPreview(args: [
           "title": "Basic Navigation",
           "height": 44,
-          "interactive": true,
+          "translucent": true,
         ])
+        .background(Color(.red))
         .previewDisplayName("Basic")
 
         // Navigation bar with buttons
         CupertinoNavigationBarPlatformViewPreview(args: [
           "title": "With Buttons",
           "height": 50,
-          "interactive": true,
           //          "style": ["tint": 0xFF00_7AFF],
           "leadingGroups": [
             [
@@ -664,7 +712,6 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
         CupertinoNavigationBarPlatformViewPreview(args: [
           "title": "Disabled",
           "height": 44,
-          "interactive": false,
           "leadingGroups": [
             [
               "buttons": [
@@ -697,7 +744,6 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
           "isDark": true,
           "title": "Dark Mode",
           "height": 60,
-          "interactive": true,
           "style": ["tint": 0xFFFF_9500],
           "leadingGroups": [
             [
@@ -732,7 +778,6 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
         CupertinoNavigationBarPlatformViewPreview(args: [
           "title": "Complex Layout",
           "height": 70,
-          "interactive": true,
           "style": ["tint": 0xFF58_56D6],
           "leadingGroups": [
             [
@@ -780,7 +825,6 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
           CupertinoNavigationBarPlatformViewPreview(args: [
             "title": "iOS 26 Glass",
             "height": 50,
-            "interactive": true,
             "style": ["tint": 0xFF00_7AFF],
             "backgroundColor": 0x8000_7AFF,  // Semi-transparent blue
             "largeTitleDisplayMode": "always",
@@ -816,7 +860,6 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
         CupertinoNavigationBarPlatformViewPreview(args: [
           "title": "Prominent Buttons",
           "height": 44,
-          "interactive": true,
           "style": ["tint": 0xFFFF_9500],
           "leadingGroups": [
             [
@@ -862,9 +905,9 @@ class CupertinoNavigationBarPlatformView: NSObject, FlutterPlatformView {
         CupertinoNavigationBarPlatformViewPreview(args: [
           "title": "Large Title Example",
           "height": 96,
-          "interactive": true,
           "style": ["tint": 0xFF30_D158],
-          "backgroundColor": 0xFF30_D158,
+          "translucent": true,
+          //          "backgroundColor": 0xFF30_D158,
           "largeTitleDisplayMode": "always",
           "leadingGroups": [
             [
